@@ -2,10 +2,14 @@ package main
 
 import (
 	"be/db"
+
 	"log"
+
 	"os"
 
 	"github.com/joho/godotenv"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -23,4 +27,7 @@ func main() {
 	}
 	sql.Connect()
 	defer sql.Close()
+	port := os.Getenv("PORT")
+	app := fiber.New()
+	app.Listen(":" + port)
 }
