@@ -2,32 +2,33 @@ package main
 
 import (
 	"be/db"
-
+	"be/handler"
 	"log"
 
-	"os"
-
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	sql := &db.Sql{
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		UserName: os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		DbName:   os.Getenv("DB_NAME"),
-	}
+	sql := db.New()
 	sql.Connect()
 	defer sql.Close()
-	port := os.Getenv("PORT")
-	app := fiber.New()
-	app.Listen(":" + port)
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	route := gin.Default()
+
+	// Routes
+	route.GET("/auth/google/login", handler.GoogleLoginHandler)
+	route.GET("/auth/google/callback", handler.GoogleCallbackHandler)
+
+	// Test route
+	route.GET("/profile", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "Welcome! You are logged in."})
+	})
+
+	route.Run(":8080")
 }
