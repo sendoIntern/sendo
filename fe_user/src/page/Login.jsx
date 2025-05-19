@@ -1,23 +1,35 @@
-// App.tsx
-import { GoogleLogin } from "@react-oauth/google";
-import { axiosInstance } from "../lib/axios";
+import { useEffect } from "react";
 
 function Login() {
-  const handleLogin = async (credentialResponse) => {
-    const { credential } = credentialResponse;
-    // Gửi credential (id_token) về server để xác minh
-    const res = await axiosInstance.post("/api/auth/google", {
-      token: credential,
-    });
-    console.log("Login success:", res.data);
-  };
+  // const [data, setData] = useState;
+  // const handleLogin = () => {};
+
+  useEffect(() => {}, []);
 
   return (
-    <div>
-      <GoogleLogin
-        onSuccess={handleLogin}
-        onError={() => console.log("Login Failed")}
-      />
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+      }}
+    >
+      <a
+        href="http://localhost:8080/auth/google/login"
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#4285F4",
+          color: "white",
+          borderRadius: "4px",
+          textDecoration: "none",
+          fontWeight: "bold",
+          fontSize: "16px",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        Đăng nhập bằng Google
+      </a>
     </div>
   );
 }
