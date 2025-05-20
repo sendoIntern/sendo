@@ -1,14 +1,22 @@
 package handler
 
 import (
+	"be/db"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetItemsHandler(c *gin.Context){
-	c.JSON(http.StatusOK, gin.H{"message": "GetItemsHandler"})
+	
+	var items []items
+	if err := db.Table("items").Find(&post).Error; err != nil {
+		c.JSON(200, gin.H{
+			"err": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{"data": items})
 	
 }
 
