@@ -19,7 +19,14 @@ func GetItemsHandler(c *gin.Context){
 }
 
 func GetItemByIdHandler(c *gin.Context){
-	fmt.Println("GetItemByIdHandler")
+	var item entity.Item
+	id := c.Param("id")
+	result := db.DB.First(&item, "id = ?", id)
+	if result.Error != nil {
+		c.JSON(400, gin.H{"error": result.Error.Error()})
+		return
+	}
+	c.JSON(200, item)
 } 
 
 func CreateItemHandler(c *gin.Context){
