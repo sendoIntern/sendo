@@ -33,14 +33,25 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Routes
-	route.GET("/auth/google/login", handler.GoogleLoginHandler)
-	route.GET("/auth/google/callback", handler.GoogleCallbackHandler)
+	//login GG
+	auth := route.Group("/auth")
+	{
+		google := auth.Group("/google")
+		{
+			google.GET("/login", handler.GoogleLoginHandler)
+			google.GET("/callback", handler.GoogleCallbackHandler)
+		}
+	}
 
-	// Test route
-	route.GET("/profile", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "Welcome! You are logged in."})
-	})
-
+	//CRUD
+	item := route.Group("/item")
+	{
+		item.GET("/", handler.GetItemsHandler) // get full item
+		item.GET("/:id", handler.GetItemByIdHandler)
+		item.POST("/create", handler.CreateItemHandler)
+		item.DELETE("/:id", handler.DeleteItemHandler)
+		item.PUT("/:id", handler.UpdateItemByIdHandler)
+	}
+	
 	route.Run(":8080")
 }

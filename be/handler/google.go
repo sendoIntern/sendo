@@ -3,8 +3,10 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +37,38 @@ func GoogleLoginHandler(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
+// func GoogleCallbackHandler(c *gin.Context) {
+// 	code := c.Query("code")
+// 	if code == "" {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing code"})
+// 		return
+// 	}
+
+// 	token, err := oauthConf.Exchange(context.Background(), code)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to exchange token"})
+// 		return
+// 	}
+
+// 	client := oauthConf.Client(context.Background(), token)
+// 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
+// 		return
+// 	}
+// 	defer resp.Body.Close()
+
+// 	var userInfo map[string]interface{}
+// 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode user info"})
+// 		return
+// 	}
+
+// 	// In ra user info (email, name, picture)
+// 	c.JSON(http.StatusOK, gin.H{"user": userInfo})
+// }
+
+
 func GoogleCallbackHandler(c *gin.Context) {
 	code := c.Query("code")
 	if code == "" {
@@ -56,12 +90,24 @@ func GoogleCallbackHandler(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	var userInfo map[string]interface{}
+	var userInfo struct {
+		ID            string `json:"id"`
+		Email         string `json:"email"`
+		Name          string `json:"name"`
+		Picture       string `json:"picture"`
+		VerifiedEmail bool   `json:"verified_email"`
+	}
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode user info"})
 		return
 	}
 
-	// In ra user info (email, name, picture)
-	c.JSON(http.StatusOK, gin.H{"user": userInfo})
+	// Redirect về frontend kèm theo user info trên URL
+	redirectURL := fmt.Sprintf("http://localhost:5173/oauth2/callback?email=%s&name=%s&picture=%s",
+		url.QueryEscape(userInfo.Email),
+		url.QueryEscape(userInfo.Name),
+		url.QueryEscape(userInfo.Picture),
+	)
+
+	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
