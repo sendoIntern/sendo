@@ -2,22 +2,20 @@ package handler
 
 import (
 	"be/db"
+	"be/entity"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetItemsHandler(c *gin.Context){
-	
-	var items []items
-	if err := db.Table("items").Find(&post).Error; err != nil {
-		c.JSON(200, gin.H{
-			"err": err.Error(),
-		})
+	var items []entity.Item
+	result := db.DB.Find(&items)
+	if result.Error != nil {
+		c.JSON(400, gin.H{"error": result.Error.Error()})
 		return
 	}
-	c.JSON(200, gin.H{"data": items})
-	
+	c.JSON(200, items)
 }
 
 func GetItemByIdHandler(c *gin.Context){
