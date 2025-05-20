@@ -6,7 +6,7 @@ function Login() {
   const handleLogin = async (credentialResponse) => {
     const { credential } = credentialResponse;
     // Gửi credential (id_token) về server để xác minh
-    const res = await axiosInstance.post("/api/auth/google", {
+    const res = await axiosInstance.get("/auth/google/login", {
       token: credential,
     });
     console.log("Login success:", res.data);
