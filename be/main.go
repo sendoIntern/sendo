@@ -12,9 +12,8 @@ import (
 )
 
 func main() {
-	sql := db.New()
-	sql.Connect()
-	defer sql.Close()
+	db.New()
+	defer db.Close()
 
 	err := godotenv.Load()
 	if err != nil {
@@ -32,14 +31,13 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Routes
-	route.GET("/auth/google/login", handler.GoogleLoginHandler)
-	route.GET("/auth/google/callback", handler.GoogleCallbackHandler)
-
-	// Test route
-	route.GET("/profile", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "Welcome! You are logged in."})
-	})
-
+	auth := route.Group("/auth")
+	{
+		google := auth.Group("/google")
+		{
+			google.GET("/login", handler.GoogleLoginHandler)
+			google.GET("/callback", handler.GoogleCallbackHandler)
+		}
+	}
 	route.Run(":8080")
 }
