@@ -5,54 +5,48 @@ import (
 	"log"
 	"os"
 
-	"github.com/jmoiron/sqlx"
+	"be/entity"
+
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-type Sql struct {
-	Db       *sqlx.DB
-	Host     string
-	Port     string
-	UserName string
-	Password string
-	DbName   string
-}
+var DB *gorm.DB
 
-// New một instance mới của Sql với giá trị từ .env
-func New() *Sql {
+// New một instance mới của DB với giá trị từ .env
+func New() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Could not load .env file")
 	}
 
-	return &Sql{
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		UserName: os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		DbName:   os.Getenv("DB_NAME"),
-	}
-}
-
-func (s *Sql) Connect() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	dataSource := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
-	s.Db = sqlx.MustConnect("postgres", dataSource)
 
-	if err := s.Db.Ping(); err != nil {
-		log.Fatal("Cannot connect to database")
+	var err2 error
+	DB, err2 = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err2 != nil {
+		log.Fatal("Failed to connect to database")
+		return
+	}
+
+	// Tự động tạo bảng nếu chưa có
+	err = DB.AutoMigrate(&entity.User{})
+	if err != nil {
+		log.Fatal("Failed to migrate database:", err)
 		return
 	}
 
 	log.Println("Connect database successful!")
 }
 
-func (s *Sql) Close() {
-	s.Db.Close()
+// đóng kết nối database
+func Close() {
+	sqlDB, err := DB.DB()
+	if err != nil {
+		log.Fatal("Failed to get database instance")
+		return
+	}
+	sqlDB.Close()
 }

@@ -12,9 +12,8 @@ import (
 )
 
 func main() {
-	sql := db.New()
-	sql.Connect()
-	defer sql.Close()
+	db.New()
+	defer db.Close()
 
 	err := godotenv.Load()
 	if err != nil {
@@ -22,7 +21,6 @@ func main() {
 	}
 
 	route := gin.Default()
-
 
 	route.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"}, // FE origin
@@ -33,7 +31,10 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+<<<<<<< HEAD
 	//login GG
+=======
+>>>>>>> 364e6f452d499519a1bd781d49d714bafe42541e
 	auth := route.Group("/auth")
 	{
 		google := auth.Group("/google")
@@ -42,6 +43,7 @@ func main() {
 			google.GET("/callback", handler.GoogleCallbackHandler)
 		}
 	}
+<<<<<<< HEAD
 
 	//CRUD
 	item := route.Group("/item")
@@ -53,5 +55,7 @@ func main() {
 		item.PUT("/:id", handler.UpdateItemByIdHandler)
 	}
 	
+=======
+>>>>>>> 364e6f452d499519a1bd781d49d714bafe42541e
 	route.Run(":8080")
 }
