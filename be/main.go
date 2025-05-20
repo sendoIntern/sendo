@@ -23,10 +23,9 @@ func main() {
 
 	route := gin.Default()
 
-	// Cấu hình CORS
 	route.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // URL của frontend Vite
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowOrigins:     []string{"http://localhost:5173"}, // FE origin
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
