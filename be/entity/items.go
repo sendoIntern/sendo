@@ -14,7 +14,7 @@ type Item struct {
 	Quantity    int       `gorm:"default:0"`
 	Price       float64   `gorm:"default:0"`
 	Picture     string
-	View        int 	  `gorm:"default:0"`
+	View        int64 	  `gorm:"default:0"`
 	Recommend   int 	  `gorm:"default:0"`
 	CreateAt    time.Time
 	UpdateAt    time.Time

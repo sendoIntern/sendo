@@ -20,12 +20,13 @@ func GetItemsHandler(c *gin.Context){
 
 func GetItemByIdHandler(c *gin.Context){
 	var item entity.Item
-	id := c.Param("id")
+	id := c.Param("itemId")
 	result := db.DB.First(&item, "id = ?", id)
 	if result.Error != nil {
 		c.JSON(400, gin.H{"error": result.Error.Error()})
 		return
 	}
+	db.DB.Model(&item).Update("view", item.View + 1)
 	c.JSON(200, item)
 } 
 
