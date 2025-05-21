@@ -4,6 +4,7 @@ import (
 	"be/db"
 	"be/entity"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,11 +24,11 @@ func GetItemByIdHandler(c *gin.Context){
 	id := c.Param("itemId")
 	result := db.DB.First(&item, "id = ?", id)
 	if result.Error != nil {
-		c.JSON(400, gin.H{"error": result.Error.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
 		return
 	}
 	db.DB.Model(&item).Update("view", item.View + 1)
-	c.JSON(200, item)
+	c.JSON(http.StatusOK, item)
 } 
 
 func CreateItemHandler(c *gin.Context){
