@@ -46,11 +46,11 @@ func main() {
 	{
 		item.GET("/", handler.GetItemsHandler) // get full item
 		item.GET("/:id", handler.GetItemByIdHandler)
-		item.POST("/create", handler.CreateItemHandler)
+		item.POST("/", handler.CreateItemHandler)
 		item.DELETE("/:id", handler.DeleteItemHandler)
 		item.PUT("/:id", handler.UpdateItemByIdHandler)
 	}
-	
+
 	route.Run(":8080")
 }
 	
