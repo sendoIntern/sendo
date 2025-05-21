@@ -15,7 +15,7 @@ type ItemCreationRequest struct {
 }
 
 type ItemCreationResponse struct {
-	ID          uuid.UUID
+	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name" binding:"required"`
 	Description string    `json:"description"`
 	Quantity    int       `json:"quantity"`
