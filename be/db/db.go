@@ -32,7 +32,10 @@ func New() {
 	}
 
 	// Tự động tạo bảng nếu chưa có
-	err = DB.AutoMigrate(&entity.User{})
+	err = DB.AutoMigrate(
+		&entity.User{},
+		&entity.Item{},
+	)
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 		return
