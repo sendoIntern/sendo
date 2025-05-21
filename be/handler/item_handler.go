@@ -131,5 +131,13 @@ func UpdateItemByIdHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully", "item": item})
+	resp := dto.ItemUpdatingResponse{
+		Name:        item.Name,
+		Description: item.Description,
+		Quantity:    item.Quantity,
+		Price:       item.Price,
+		Picture:     item.Picture,
+		UpdatedAt:   item.UpdatedAt,
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully", "item": resp})
 }
