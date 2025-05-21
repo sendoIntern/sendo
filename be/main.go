@@ -45,7 +45,7 @@ func main() {
 	item := route.Group("/item")
 	{
 		item.GET("/", handler.GetItemsHandler) // get full item
-		item.GET("/:id", handler.GetItemByIdHandler)
+		item.PATCH("/:itemId", handler.GetItemByIdHandler)
 		item.POST("/", handler.CreateItemHandler)
 		item.DELETE("/:id", handler.DeleteItemHandler)
 		item.PUT("/:id", handler.UpdateItemByIdHandler)
@@ -53,4 +53,3 @@ func main() {
 
 	route.Run(":8080")
 }
-	
