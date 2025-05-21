@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func GetItemsHandler(c *gin.Context) {
@@ -33,6 +34,7 @@ func GetItemByIdHandler(c *gin.Context) {
 }
 
 func CreateItemHandler(c *gin.Context) {
+	//limit input from request
 	var req dto.ItemCreationRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -53,6 +55,7 @@ func CreateItemHandler(c *gin.Context) {
 		return
 	}
 
+	//only show info that's need to show
 	resp := dto.ItemCreationResponse{
 		ID:          item.ID,
 		Name:        item.Name,
@@ -67,7 +70,31 @@ func CreateItemHandler(c *gin.Context) {
 }
 
 func DeleteItemHandler(c *gin.Context) {
-	fmt.Println("DeleteItemHandler")
+	id := c.Param("id")
+
+	// validate uuid
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item ID"})
+		return
+	}
+
+	result := db.DB.Delete(&entity.Item{}, uid)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
+		return
+	}
+
+	// check is deleted?
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":        "Item deleted successfully",
+		"row(s) deleted": result.RowsAffected,
+	})
 }
 
 func UpdateItemByIdHandler(c *gin.Context) {
