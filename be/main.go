@@ -45,8 +45,13 @@ func main() {
 	item := route.Group("/item")
 	{
 		item.GET("/", handler.GetItemsHandler) // get full item
+<<<<<<< HEAD
 		item.GET("/:id", handler.GetItemByIdHandler)
 		item.POST("/", handler.CreateItemHandler)
+=======
+		item.PATCH("/:itemId", handler.GetItemByIdHandler)
+		item.POST("/create", handler.CreateItemHandler)
+>>>>>>> 52b5ed32b4751e7b2a0183ee5d9db24c52474700
 		item.DELETE("/:id", handler.DeleteItemHandler)
 		item.PUT("/:id", handler.UpdateItemByIdHandler)
 	}
