@@ -16,8 +16,8 @@ type Item struct {
 	Picture     string    `json:"picture"`
 	View        int64     `json:"view" gorm:"default:0"`
 	Recommend   int       `json:"recommend" gorm:"default:0"`
-	CreateAt    time.Time `json:"create_at"`
-	UpdateAt    time.Time `json:"update_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // auto generate uuid before save a new user into database
