@@ -4,7 +4,6 @@ import (
 	"be/db"
 	"be/dto"
 	"be/entity"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -63,7 +62,7 @@ func CreateItemHandler(c *gin.Context) {
 		Quantity:    item.Quantity,
 		Price:       item.Price,
 		Picture:     item.Picture,
-		CreateAt:    item.CreatedAt,
+		CreatedAt:   item.CreatedAt,
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item created", "item": resp})
@@ -98,5 +97,39 @@ func DeleteItemHandler(c *gin.Context) {
 }
 
 func UpdateItemByIdHandler(c *gin.Context) {
-	fmt.Println("UpdateItemByIdHandler")
+	id := c.Param("id")
+
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item ID"})
+		return
+	}
+
+	var req dto.ItemUpdatingRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var item entity.Item
+	result := db.DB.First(&item, "id = ?", uid)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		return
+	}
+
+	// update fields
+	item.Name = req.Name
+	item.Description = req.Description
+	item.Quantity = req.Quantity
+	item.Price = req.Price
+	item.Picture = req.Picture
+
+	// Lưu thay đổi vào DB
+	if err := db.DB.Save(&item).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully", "item": item})
 }
