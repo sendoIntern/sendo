@@ -32,6 +32,43 @@ func GetItemByIdHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, item)
 }
 
+// func CreateItemHandler(c *gin.Context) {
+// 	file, fileHeader, err := c.Request.FormFile("picture")
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Image is required"})
+// 		return
+// 	}
+// 	defer file.Close()
+
+// 	imageURL, err := utils.UploadToCloudinary(file, fileHeader)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot upload image"})
+// 		return
+// 	}
+
+// 	// Nhận các field khác từ form-data
+// 	var req dto.ItemCreationRequest
+// 	req.Name = c.PostForm("name")
+// 	req.Description = c.PostForm("description")
+// 	req.Quantity, _ = strconv.Atoi(c.PostForm("quantity"))
+// 	req.Price, _ = strconv.ParseFloat(c.PostForm("price"), 64)
+
+// 	item := entity.Item{
+// 		Name:        req.Name,
+// 		Description: req.Description,
+// 		Quantity:    req.Quantity,
+// 		Price:       req.Price,
+// 		Picture:     imageURL,
+// 	}
+
+// 	if err := db.DB.Create(&item).Error; err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot create item"})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "Item created", "item": item})
+// }
+
 func CreateItemHandler(c *gin.Context) {
 	//limit input from request
 	var req dto.ItemCreationRequest
