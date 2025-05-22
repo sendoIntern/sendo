@@ -6,25 +6,37 @@ import Meta from "antd/es/card/Meta";
 function CardItem() {
   const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null); // 👈 thêm state này
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await axiosInstance.get("/item/getAllItems", {
+        withCredentials: true,
+      });
+      setData(res.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axiosInstance.get("/item/getAllItems", {
-          withCredentials: true,
-        });
-        setData(res.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-
     fetchProducts();
   }, []);
 
-  // Khi click vào card hoặc meta → lưu item được chọn
+  const fetchDataByid = async (id) => {
+    try {
+      const res = await axiosInstance.patch(`/item/getItemById/${id}`, {
+        withCredentials: true,
+      });
+      setData(res.data);
+      console.log("view day");
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
   const showModal = (item) => {
+    fetchDataByid(item.id);
     setSelectedItem(item);
     setIsModalOpen(true);
   };

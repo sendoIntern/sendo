@@ -17,7 +17,7 @@ func main() {
 
 	route.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173"}, // FE origin
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
@@ -45,7 +45,7 @@ func main() {
 	item := route.Group("/item")
 	{
 		item.GET("/getAllItems", handler.GetItemsHandler) // get full item
-		item.PATCH("/:itemId", handler.GetItemByIdHandler)
+		item.PATCH("/getItemById/:itemId", handler.GetItemByIdHandler)
 		item.POST("/createNewItem", handler.CreateItemHandler)
 		item.DELETE("/:id", handler.DeleteItemHandler)
 		item.PUT("/:id", handler.UpdateItemByIdHandler)
