@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card } from "antd";
+import { Button, Card, Modal } from "antd";
 import { axiosInstance } from "../lib/axios";
 import Meta from "antd/es/card/Meta";
 
 function CardItem() {
   const [data, setData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null); // 👈 thêm state này
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -21,28 +23,89 @@ function CardItem() {
     fetchProducts();
   }, []);
 
+  // Khi click vào card hoặc meta → lưu item được chọn
+  const showModal = (item) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null); // clear sau khi đóng modal
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+  };
+
   return (
     <div
       style={{
         display: "flex",
-        justifyItems: "space-between",
         flexWrap: "wrap",
+        justifyContent: "space-around",
+        gap: "20px",
       }}
     >
-      {data.map((product) => (
+      {data.map((item) => (
         <Card
-          key={product.ID}
+          key={item.id}
           style={{ width: 300 }}
-          cover={<img alt="Not Found" src={product.Picture} />}
+          cover={
+            <img
+              alt="example"
+              src={item.picture}
+              onClick={() => showModal(item)}
+            />
+          }
         >
-          <Meta title={product.Name} description={product.Description} />
-          <p>Price: {product.Price}</p>
-          <p>Recommend: {product.Recommend}</p>
-          <Button style={{ marginTop: "10px", width: "100%" }} type="primary">
+          <Meta
+            style={{ textAlign: "center" }}
+            title={item.name}
+            onClick={() => showModal(item)}
+          />
+          <Meta
+            style={{ height: "100px" }}
+            description={item.description}
+            onClick={() => showModal(item)}
+          />
+          <Meta
+            description={`Price: ${item.price}`}
+            onClick={() => showModal(item)}
+          />
+          <Button
+            style={{ width: "100%", marginTop: "10px", color: "blue" }}
+            onClick={() => showModal(item)}
+          >
             Buy
           </Button>
         </Card>
       ))}
+
+      <Modal
+        title="Chi tiết sản phẩm"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        {selectedItem && (
+          <Card
+            style={{ width: "100%" }}
+            cover={<img alt="example" src={selectedItem.picture} />}
+          >
+            <Meta style={{ textAlign: "center" }} title={selectedItem.name} />
+            <Meta
+              style={{ height: "100px" }}
+              description={selectedItem.description}
+            />
+            <Meta description={`Price: ${selectedItem.price}`} />
+            <Button style={{ width: "100%", marginTop: "10px", color: "blue" }}>
+              Buy
+            </Button>
+          </Card>
+        )}
+      </Modal>
     </div>
   );
 }
