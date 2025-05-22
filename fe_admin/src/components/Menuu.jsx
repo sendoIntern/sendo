@@ -16,6 +16,10 @@ const items = [
         key: "/products",
         label: "Products",
       },
+      {
+        key: "/editProducts",
+        label: "EditProducts",
+      },
     ],
   },
 ];

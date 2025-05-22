@@ -46,7 +46,7 @@ func main() {
 	{
 		item.GET("/getAllItems", handler.GetItemsHandler) // get full item
 		item.PATCH("/:itemId", handler.GetItemByIdHandler)
-		item.POST("/", handler.CreateItemHandler)
+		item.POST("/createNewItem", handler.CreateItemHandler)
 		item.DELETE("/:id", handler.DeleteItemHandler)
 		item.PUT("/:id", handler.UpdateItemByIdHandler)
 	}
