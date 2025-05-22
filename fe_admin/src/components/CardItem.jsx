@@ -8,18 +8,17 @@ function CardItem() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const fetchProducts = async () => {
-    try {
-      const res = await axiosInstance.get("/item/getAllItems", {
-        withCredentials: true,
-      });
-      setData(res.data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
-
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axiosInstance.get("/item/getAllItems", {
+          withCredentials: true,
+        });
+        setData(res.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
     fetchProducts();
   }, []);
 
@@ -28,16 +27,15 @@ function CardItem() {
       const res = await axiosInstance.patch(`/item/getItemById/${id}`, {
         withCredentials: true,
       });
-      setData(res.data);
-      console.log("view day");
+      selectedItem(res.data);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
   };
 
   const showModal = (item) => {
-    fetchDataByid(item.id);
     setSelectedItem(item);
+    fetchDataByid(item.id);
     setIsModalOpen(true);
   };
 
@@ -86,10 +84,7 @@ function CardItem() {
             description={`Price: ${item.price}`}
             onClick={() => showModal(item)}
           />
-          <Button
-            style={{ width: "100%", marginTop: "10px", color: "blue" }}
-            onClick={() => showModal(item)}
-          >
+          <Button style={{ width: "100%", marginTop: "10px", color: "blue" }}>
             Buy
           </Button>
         </Card>
