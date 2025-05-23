@@ -21,7 +21,7 @@ import { useState } from "react";
 import { axiosInstance } from "./lib/axios";
 import axios from "axios";
 const App = () => {
-  const [setUserInfor] = useState(null);
+  const [, setUserInfor] = useState(null);
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
