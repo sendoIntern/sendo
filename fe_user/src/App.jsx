@@ -18,6 +18,7 @@
 // export default App;
 import { useGoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
+import { axiosInstance } from "./lib/axios";
 import axios from "axios";
 const App = () => {
   const [setUserInfor] = useState(null);
@@ -36,14 +37,14 @@ const App = () => {
         console.log("Data của FE", res.data);
 
         // call api be
-        const responce = await axios.post("", {
+        const responce = await axiosInstance.post("/auth/login", {
           name: res.data.name,
           email: res.data.email,
           picture: res.data.picture,
         });
 
         console.log("Data từ Be:", responce.data);
-        localStorage.setItem("token", responce.data.access_token);
+        localStorage.setItem("token", responce.data.token);
       } catch (err) {
         console.error("Lỗi đăng nhập", err);
       }
