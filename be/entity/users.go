@@ -1,16 +1,19 @@
 package entity
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID       uuid.UUID `gorm:"type:uuid;primaryKey"`
-	GoogleID string    `gorm:"unique"`
-	Name     string
-	Email    string `gorm:"unique"`
-	Picture  string
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Name      string
+	Email     string `gorm:"unique"`
+	Picture   string
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // auto generate uuid before save a new user into database
