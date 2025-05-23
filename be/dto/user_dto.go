@@ -7,10 +7,9 @@ import (
 )
 
 type LoginRequest struct {
-	GoogleID string `json:"google_id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Picture  string `json:"picture"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Picture string `json:"picture"`
 }
 
 type LoginResponse struct {
