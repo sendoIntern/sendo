@@ -31,16 +31,20 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	//login GG
+	// //login GG
+	// auth := route.Group("/auth")
+	// {
+	// 	google := auth.Group("/google")
+	// 	{
+	// 		google.GET("/login", handler.GoogleLoginHandler)
+	// 		google.GET("/callback", handler.GoogleCallbackHandler)
+	// 	}
+	// }
+	// Login GG from frontend
 	auth := route.Group("/auth")
 	{
-		google := auth.Group("/google")
-		{
-			google.GET("/login", handler.GoogleLoginHandler)
-			google.GET("/callback", handler.GoogleCallbackHandler)
-		}
+		auth.POST("/login", handler.LoginHandler)
 	}
-
 	//CRUD
 	item := route.Group("/item")
 	{

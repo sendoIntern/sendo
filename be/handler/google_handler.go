@@ -90,15 +90,14 @@ func GoogleCallbackHandler(c *gin.Context) {
 
 	// Chuyển map => struct
 	user := entity.User{
-		GoogleID: userInfo["id"].(string),
-		Name:     userInfo["name"].(string),
-		Email:    userInfo["email"].(string),
-		Picture:  userInfo["picture"].(string),
+		Name:    userInfo["name"].(string),
+		Email:   userInfo["email"].(string),
+		Picture: userInfo["picture"].(string),
 	}
 
 	// Check tồn tại user (theo Google ID hoặc email), nếu chưa có thì tạo
 	var existing entity.User
-	result := db.DB.Where("google_id = ?", user.GoogleID).First(&existing)
+	result := db.DB.Where("email = ?", user.Email).First(&existing)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			db.DB.Create(&user)
