@@ -40,6 +40,7 @@ function Dashboard() {
       await axiosInstance.put(`/item/${id}`, updatedData, {
         withCredentials: true,
       });
+      setLoading(false);
     } catch (error) {
       console.error("Error updating product:", error);
     } finally {

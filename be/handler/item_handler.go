@@ -41,6 +41,7 @@ func CreateItemHandler(c *gin.Context) {
 		return
 	}
 	defer file.Close()
+	
 
 	imageURL, err := utils.UploadToCloudinary(file, fileHeader)
 	if err != nil {
