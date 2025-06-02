@@ -4,13 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Register(r *gin.Engine) {
+func ItemRoutes(r *gin.Engine) {
 	itemGroup := r.Group("/item")
 	{
-		itemGroup.GET("/getAllItems", GetItemsHandler)
+		itemGroup.GET("/getAllItems", GetAllItemsHandler)
 		itemGroup.GET("/getItemById/:itemId", GetItemByIdHandler)
-		itemGroup.POST("/createNewItem", CreateItemHandler)
-		itemGroup.PUT("/:id", UpdateItemByIdHandler)
-		itemGroup.DELETE("/:id", DeleteItemHandler)
+		// itemGroup.POST("/createNewItem", CreateItemHandler)
+		// itemGroup.PUT("/:id", UpdateItemByIdHandler)
+		// itemGroup.DELETE("/:id", DeleteItemHandler)
 	}
 }
