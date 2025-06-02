@@ -1,14 +1,12 @@
-package routes
+package http
 
 import (
-	"be/services/handler"
-
 	"github.com/gin-gonic/gin"
 )
 
 func AuthRoutes(router *gin.Engine) {
 	api := router.Group("/auth")
 	{
-		api.POST("/login", handler.LoginHandler)
+		api.POST("/login", LoginHandler)
 	}
 }

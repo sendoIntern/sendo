@@ -2,8 +2,7 @@ package main
 
 import (
 	"be/pkg/db"
-	"be/services/routes"
-
+	"be/services/auth/delivery/http"
 	"log"
 	"time"
 
@@ -43,9 +42,8 @@ func main() {
 	// }
 	// Login GG from frontend
 
-	// router := mux.NewRouter()
 
-	routes.AuthRoutes(router)
+	http.AuthRoutes(router)
 
 	// auth := route.Group("/auth")
 	// {
