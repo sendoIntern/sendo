@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"be/entity"
+	"be/services/items/model/entity"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -33,7 +33,7 @@ func New() {
 
 	// Tự động tạo bảng nếu chưa có
 	err = DB.AutoMigrate(
-		&entity.User{},
+		// &entity.User{},
 		&entity.Item{},
 	)
 	if err != nil {

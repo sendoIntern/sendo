@@ -1,8 +1,8 @@
 package main
 
 import (
-	"be/db"
-	"be/routes"
+	"be/pkg/db"
+	_ "be/services/items/delivery/http"
 	"log"
 	"time"
 
@@ -44,7 +44,7 @@ func main() {
 
 	// router := mux.NewRouter()
 
-	routes.AuthRoutes(router)
+	// routes.AuthRoutes(router)
 
 	// auth := route.Group("/auth")
 	// {
