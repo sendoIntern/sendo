@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"be/handler"
+	"be/services/handler"
 
 	"github.com/gin-gonic/gin"
 )

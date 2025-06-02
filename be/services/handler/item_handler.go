@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"be/db"
-	"be/dto"
-	"be/entity"
-	"be/utils"
+	"be/pkg/db"
+	"be/pkg/utils"
+	"be/services/dto"
+	"be/services/entity"
 	"net/http"
 	"strconv"
 

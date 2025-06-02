@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"be/db"
-	"be/dto"
-	"be/entity"
+	"be/pkg/db"
+	"be/services/dto"
+	"be/services/entity"
 	"errors"
 	"net/http"
 	"os"

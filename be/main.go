@@ -1,8 +1,9 @@
 package main
 
 import (
-	"be/db"
-	"be/routes"
+	"be/pkg/db"
+	"be/services/routes"
+
 	"log"
 	"time"
 

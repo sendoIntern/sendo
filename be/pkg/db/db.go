@@ -1,11 +1,10 @@
 package db
 
 import (
+	"be/services/entity"
 	"fmt"
 	"log"
 	"os"
-
-	"be/entity"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
