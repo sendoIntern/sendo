@@ -2,7 +2,7 @@ package main
 
 import (
 	"be/pkg/db"
-	"be/services/auth/delivery/http"
+	_ "be/services/items/delivery/http"
 	"log"
 	"time"
 
@@ -42,8 +42,7 @@ func main() {
 	// }
 	// Login GG from frontend
 
-
-	http.AuthRoutes(router)
+	// routes.AuthRoutes(router)
 
 	// auth := route.Group("/auth")
 	// {
