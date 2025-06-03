@@ -4,6 +4,8 @@ import (
 	"be/pkg/db"
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
+	"be/services/items/model/response"
+
 	"be/services/items/usecase"
 	"net/http"
 	"strconv"
@@ -58,21 +60,21 @@ func CreateItemHandler(c *gin.Context) {
 		return
 	}
 
-	// 	resp := response.ItemCreationResponse{
-	// 		ID:          item.ID,
-	// 		Name:        item.Name,
-	// 		Description: item.Description,
-	// 		Quantity:    item.Quantity,
-	// 		Price:       item.Price,
-	// 		Picture:     item.Picture,
-	// 		CreatedAt:   item.CreatedAt,
-	// 	}
+	resp := response.ItemCreationResponse{
+		ID:          item.ID,
+		Name:        item.Name,
+		Description: item.Description,
+		Quantity:    item.Quantity,
+		Price:       item.Price,
+		Picture:     item.Picture,
+		CreatedAt:   item.CreatedAt,
+	}
 
-	// 	c.JSON(http.StatusOK, gin.H{"message": "Item created", "item": resp})
-	// }
+	c.JSON(http.StatusOK, gin.H{"message": "Item created", "item": resp})
+}
 
-	// func DeleteItemHandler(c *gin.Context) {
-	// 	id := c.Param("id")
+func DeleteItemHandler(c *gin.Context) {
+	id := c.Param("id")
 
 	err := usecase.DeleteItem(id)
 	if err != nil {
@@ -88,11 +90,11 @@ func CreateItemHandler(c *gin.Context) {
 func UpdateItemByIdHandler(c *gin.Context) {
 	id := c.Param("id")
 
-	// 	var req request.ItemUpdatingRequest
-	// 	req.Name = c.PostForm("name")
-	// 	req.Description = c.PostForm("description")
-	// 	req.Quantity, _ = strconv.ParseInt(c.PostForm("quantity"), 10, 64)
-	// 	req.Price, _ = strconv.ParseFloat(c.PostForm("price"), 64)
+	var req request.ItemUpdatingRequest
+	req.Name = c.PostForm("name")
+	req.Description = c.PostForm("description")
+	req.Quantity, _ = strconv.ParseInt(c.PostForm("quantity"), 10, 64)
+	req.Price, _ = strconv.ParseFloat(c.PostForm("price"), 64)
 
 	file, fileHeader, err := c.Request.FormFile("picture")
 	if err == nil { //exist new picture then upload
@@ -111,15 +113,14 @@ func UpdateItemByIdHandler(c *gin.Context) {
 		return
 	}
 
-	// 	resp := response.ItemUpdatingResponse{
-	// 		Name:        item.Name,
-	// 		Description: item.Description,
-	// 		Quantity:    item.Quantity,
-	// 		Price:       item.Price,
-	// 		Picture:     item.Picture,
-	// 		UpdatedAt:   item.UpdatedAt,
-	// 	}
+	resp := response.ItemUpdatingResponse{
+		Name:        item.Name,
+		Description: item.Description,
+		Quantity:    item.Quantity,
+		Price:       item.Price,
+		Picture:     item.Picture,
+		UpdatedAt:   item.UpdatedAt,
+	}
 
-	// 	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully", "item": resp})
-	// }
+	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully", "item": resp})
 }
