@@ -1,14 +1,43 @@
 package repository
 
-// func (r rewardAnalyticRepo) CreateReward(ctx context.Context, data entity.MissionRewardCommission) error {
-// 	db := infra.GetDB()
-// 	logContext := log.WithContext(ctx)
-// 	logContext.Infof("CreateRewardRepo start %v", data)
+import (
+	"be/pkg/db"
+	"be/services/items/model/entity"
+	"errors"
 
-// 	if err := insertMissionRewardCommission(ctx, db, &data); err != nil {
-// 		logContext.Errorf("CreateReward failed to insert mission reward commission: %v", err)
-// 		return err
-// 	}
+	"github.com/google/uuid"
+)
 
-// 	return nil
-// }
+func CreateItem(item entity.Item) error {
+	if err := db.DB.Create(&item).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteItem(id uuid.UUID) error {
+	result := db.DB.Delete(&entity.Item{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("item not found")
+	}
+	return nil
+}
+
+func UpdateItem(item entity.Item) error {
+	if err := db.DB.Save(&item).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func IsExistItem(id uuid.UUID) (entity.Item, bool) {
+	var item entity.Item
+	result := db.DB.First(&item, "id = ?", id)
+	if result.Error != nil {
+		return entity.Item{}, false
+	}
+	return item, true
+}
