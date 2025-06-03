@@ -2,7 +2,7 @@ package main
 
 import (
 	"be/pkg/db"
-	_ "be/services/items/delivery/http"
+	"be/services/items/delivery/http"
 	"log"
 	"time"
 
@@ -30,6 +30,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	http.Register(router)
 
 	// //login GG
 	// auth := route.Group("/auth")

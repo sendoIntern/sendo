@@ -6,6 +6,7 @@ import (
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
 	"be/services/items/model/response"
+	"be/services/items/usecase"
 	"net/http"
 	"strconv"
 
@@ -43,29 +44,18 @@ func CreateItemHandler(c *gin.Context) {
 	}
 	defer file.Close()
 
-	imageURL, err := utils.UploadToCloudinary(file, fileHeader)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot upload image"})
-		return
-	}
-
 	// Nhận các field khác từ form-data
 	var req request.ItemCreationRequest
 	req.Name = c.PostForm("name")
 	req.Description = c.PostForm("description")
 	req.Quantity, _ = strconv.ParseInt(c.PostForm("quantity"), 10, 64)
 	req.Price, _ = strconv.ParseFloat(c.PostForm("price"), 64)
+	req.PictureHeader = fileHeader
+	req.PictureFile = &file
 
-	item := entity.Item{
-		Name:        req.Name,
-		Description: req.Description,
-		Quantity:    req.Quantity,
-		Price:       req.Price,
-		Picture:     imageURL,
-	}
-
-	if err := db.DB.Create(&item).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot create item"})
+	item, err := usecase.CreateItem(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Item Creation Error": err.Error()})
 		return
 	}
 
@@ -85,28 +75,14 @@ func CreateItemHandler(c *gin.Context) {
 func DeleteItemHandler(c *gin.Context) {
 	id := c.Param("id")
 
-	// validate uuid
-	uid, err := uuid.Parse(id)
+	err := usecase.DeleteItem(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item ID"})
-		return
-	}
-
-	result := db.DB.Delete(&entity.Item{}, uid)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
-		return
-	}
-
-	// check is deleted?
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Item Deletion Error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":        "Item deleted successfully",
-		"row(s) deleted": result.RowsAffected,
+		"message": "Item deleted successfully",
 	})
 }
 
@@ -136,7 +112,7 @@ func UpdateItemByIdHandler(c *gin.Context) {
 		defer file.Close()
 		imageURL, err := utils.UploadToCloudinary(file, fileHeader)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot upload image"})
+			c.JSON(http.StatusInternalServerError, gin.H{"Item Update Error": "Cannot upload image"})
 			return
 		}
 		item.Picture = imageURL

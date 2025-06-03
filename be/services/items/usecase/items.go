@@ -1,19 +1,28 @@
 package usecase
 
-// func (r rewardAnalyticService) CreateRewardAnalytic(ctx context.Context, data entity.MissionRewardCommission) error {
-// 	logContext := logger.EnhanceWith(ctx)
-// 	logContext.Infof("CreateRewardAnalytic start %+v", data)
+import (
+	"be/pkg/utils"
+	"be/services/items/model/entity"
+	"be/services/items/model/request"
+	"be/services/items/repository"
+)
 
-// 	if r.rewardAnalyticsRepo == nil {
-// 		logContext.Error("CreateRewardAnalytic rewardAnalyticsRepo is nil")
-// 		return errors.New("CreateRewardAnalytic rewardAnalyticsRepo is nil")
-// 	}
+func CreateItem(req request.ItemCreationRequest) (entity.Item, error) {
+	imageURL, err := utils.UploadToCloudinary(*req.PictureFile, req.PictureHeader)
+	if err != nil {
+		return entity.Item{}, err
+	}
+	item := entity.Item{
+		Name:        req.Name,
+		Description: req.Description,
+		Quantity:    req.Quantity,
+		Price:       req.Price,
+		Picture:     imageURL,
+	}
 
-// 	if err := r.rewardAnalyticsRepo.CreateReward(ctx, data); err != nil {
-// 		logContext.Errorw("CreateRewardAnalytic error", "error", err, "data", data)
-// 		return err
-// 	}
+	if err := repository.CreateItem(item); err != nil {
+		return entity.Item{}, err
+	}
 
-// 	logContext.Infof("CreateRewardAnalytic success: %s", utils.DumpJson(data))
-// 	return nil
-// }
+	return item, nil
+}
