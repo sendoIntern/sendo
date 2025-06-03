@@ -33,32 +33,5 @@ func main() {
 
 	http.Register(router)
 
-	// //login GG
-	// auth := route.Group("/auth")
-	// {
-	// 	google := auth.Group("/google")
-	// 	{
-	// 		google.GET("/login", handler.GoogleLoginHandler)
-	// 		google.GET("/callback", handler.GoogleCallbackHandler)
-	// 	}
-	// }
-	// Login GG from frontend
-
-	// routes.AuthRoutes(router)
-
-	// auth := route.Group("/auth")
-	// {
-	// 	auth.POST("/login", handler.LoginHandler)
-	// }
-	//CRUD
-	// item := route.Group("/item")
-	// {
-	// 	item.GET("/getAllItems", handler.GetItemsHandler) // get full item
-	// 	item.PATCH("/getItemById/:itemId", handler.GetItemByIdHandler)
-	// 	item.POST("/createNewItem", handler.CreateItemHandler)
-	// 	item.DELETE("/:id", handler.DeleteItemHandler)
-	// 	item.PUT("/:id", handler.UpdateItemByIdHandler)
-	// }
-
 	router.Run(":8080")
 }
