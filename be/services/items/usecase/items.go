@@ -5,6 +5,8 @@ import (
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
 	"be/services/items/repository"
+
+	"github.com/google/uuid"
 )
 
 func CreateItem(req request.ItemCreationRequest) (entity.Item, error) {
@@ -25,4 +27,12 @@ func CreateItem(req request.ItemCreationRequest) (entity.Item, error) {
 	}
 
 	return item, nil
+}
+
+func DeleteItem(id string) error {
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	return repository.DeleteItem(uid)
 }
