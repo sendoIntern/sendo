@@ -25,3 +25,19 @@ func DeleteItem(id uuid.UUID) error {
 	}
 	return nil
 }
+
+func UpdateItem(item entity.Item) error {
+	if err := db.DB.Save(&item).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func IsExistItem(id uuid.UUID) (entity.Item, bool) {
+	var item entity.Item
+	result := db.DB.First(&item, "id = ?", id)
+	if result.Error != nil {
+		return entity.Item{}, false
+	}
+	return item, true
+}

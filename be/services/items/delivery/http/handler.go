@@ -2,7 +2,6 @@ package http
 
 import (
 	"be/pkg/db"
-	"be/pkg/utils"
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
 	"be/services/items/model/response"
@@ -11,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func GetItemsHandler(c *gin.Context) {
@@ -88,18 +86,6 @@ func DeleteItemHandler(c *gin.Context) {
 
 func UpdateItemByIdHandler(c *gin.Context) {
 	id := c.Param("id")
-	uid, err := uuid.Parse(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item ID"})
-		return
-	}
-
-	var item entity.Item
-	result := db.DB.First(&item, "id = ?", uid)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
-		return
-	}
 
 	var req request.ItemUpdatingRequest
 	req.Name = c.PostForm("name")
@@ -110,22 +96,17 @@ func UpdateItemByIdHandler(c *gin.Context) {
 	file, fileHeader, err := c.Request.FormFile("picture")
 	if err == nil { //exist new picture then upload
 		defer file.Close()
-		imageURL, err := utils.UploadToCloudinary(file, fileHeader)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"Item Update Error": "Cannot upload image"})
-			return
-		}
-		item.Picture = imageURL
+		req.PictureFile = &file
+		req.PictureHeader = fileHeader
+	} else {
+		req.PictureFile = nil
+		req.PictureHeader = nil
 	}
 
-	// Update other fields
-	item.Name = req.Name
-	item.Description = req.Description
-	item.Quantity = req.Quantity
-	item.Price = req.Price
-
-	if err := db.DB.Save(&item).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item"})
+	var item entity.Item
+	item, err = usecase.UpdateItem(id, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Item Update Error": err.Error()})
 		return
 	}
 
