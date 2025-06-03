@@ -9,8 +9,8 @@ func ItemRoutes(r *gin.Engine) {
 	{
 		itemGroup.GET("/getAllItems", GetAllItemsHandler)
 		itemGroup.GET("/getItemById/:itemId", GetItemByIdHandler)
-		// itemGroup.POST("/createNewItem", CreateItemHandler)
-		// itemGroup.PUT("/:id", UpdateItemByIdHandler)
-		// itemGroup.DELETE("/:id", DeleteItemHandler)
+		itemGroup.POST("/createNewItem", CreateItemHandler)
+		itemGroup.PUT("/:id", UpdateItemByIdHandler)
+		itemGroup.DELETE("/:id", DeleteItemHandler)
 	}
 }
