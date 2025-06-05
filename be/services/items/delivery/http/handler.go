@@ -5,6 +5,9 @@ import (
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
 	"be/services/items/model/response"
+	"log"
+
+	"be/pkg/rabbitmq"
 
 	"be/services/items/usecase"
 	"net/http"
@@ -121,4 +124,22 @@ func UpdateItemByIdHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully", "item": resp})
+}
+
+func UploadExcelHandler(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
+		return
+	}
+	items := usecase.ParseExcel(file)
+
+	for i := range items {
+		item := items[i]
+		if err := rabbitmq.Publish(item); err != nil {
+			log.Printf(" Publish error: %v\n", err)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "import queued"})
 }
