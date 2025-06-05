@@ -21,7 +21,7 @@ function CardItem() {
     };
     fetchProducts();
   }, []);
-  console.log(("data", data));
+
   const fetchDataByid = async (id) => {
     try {
       const res = await axiosInstance.patch(`/item/getItemById/${id}`, {

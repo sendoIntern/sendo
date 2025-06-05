@@ -16,6 +16,9 @@ function Dashboard() {
   const [modalUpdateForm, setModalUpdateForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
+  const [fileImport, setFileImport] = useState(null);
+  const [showImportFile, setShowImportFile] = useState(false);
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -65,6 +68,23 @@ function Dashboard() {
     }
   };
 
+  // const handleImmportExcel = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("file", fileImport);
+
+  //     // await axiosInstance.post("/item/importExcel", formData, {
+  //     //   withCredentials: true,
+  //     // });
+  //   } catch (error) {
+  //     console.error("Error importing Excel file:", error);
+  //   } finally {
+  //     fetchProducts();
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleCreateItem = async () => {
     setLoading(true);
     try {
@@ -102,6 +122,27 @@ function Dashboard() {
       <button onClick={() => setShowCreateForm(!showCreateForm)}>
         {showCreateForm ? "Close" : "New"}
       </button>
+      <br />
+
+      <button onClick={() => setShowImportFile(!showImportFile)}>
+        {showImportFile ? "Close" : "Import file excel"}
+      </button>
+
+      {showImportFile && (
+        <>
+          <input
+            type="file"
+            accept=".xlsx"
+            onChange={(e) => {
+              e.target.files[0]
+                ? setFileImport(e.target.files[0])
+                : setFileImport(null);
+            }}
+          ></input>
+          <br />
+          {/* <button onClick={handleImmportExcel()}>submit</button> */}
+        </>
+      )}
 
       {showCreateForm && (
         <div style={{ marginTop: "20px" }}>
