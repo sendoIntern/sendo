@@ -12,5 +12,6 @@ func ItemRoutes(r *gin.Engine) {
 		itemGroup.POST("/createNewItem", CreateItemHandler)
 		itemGroup.PUT("/:id", UpdateItemByIdHandler)
 		itemGroup.DELETE("/:id", DeleteItemHandler)
+		itemGroup.POST("/import", UploadExcelHandler)
 	}
 }
