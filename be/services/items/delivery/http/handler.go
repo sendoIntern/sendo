@@ -19,9 +19,7 @@ func GetAllItemsHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get items: " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"items": items,
-	})
+	c.JSON(http.StatusOK, items)
 
 }
 
