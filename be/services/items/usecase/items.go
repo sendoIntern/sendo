@@ -1,18 +1,25 @@
 package usecase
 
 import (
+	"be/pkg/cloudinary"
 	"be/pkg/db"
-	"be/pkg/utils"
 	"be/services/items/model/entity"
+
 	"be/services/items/model/request"
 	"be/services/items/repository"
 	"errors"
+	"log"
+	"mime/multipart"
+	"strconv"
+	"time"
+
+	"github.com/xuri/excelize/v2"
 
 	"github.com/google/uuid"
 )
 
 func CreateItem(req request.ItemCreationRequest) (entity.Item, error) {
-	imageURL, err := utils.UploadToCloudinary(*req.PictureFile, req.PictureHeader)
+	imageURL, err := cloudinary.UploadToCloudinary(*req.PictureFile, req.PictureHeader)
 	if err != nil {
 		return entity.Item{}, err
 	}
@@ -51,7 +58,7 @@ func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error)
 		return entity.Item{}, errors.New("item not found")
 	}
 	if req.PictureFile != nil {
-		imgURL, err := utils.UploadToCloudinary(*req.PictureFile, req.PictureHeader)
+		imgURL, err := cloudinary.UploadToCloudinary(*req.PictureFile, req.PictureHeader)
 		if err != nil {
 			return entity.Item{}, err
 		} else {
@@ -87,4 +94,54 @@ func GetItemById(itemId string) (*entity.Item, error) {
 	}
 	db.DB.Model(&item).Update("view", item.View+1)
 	return &item, nil
+}
+
+func ParseExcel(file *multipart.FileHeader) []entity.Item {
+	var items []entity.Item
+
+	f, err := file.Open()
+	if err != nil {
+		log.Printf("Cannot open file: %v\n", err)
+		return items
+	}
+	defer f.Close()
+
+	excelFile, err := excelize.OpenReader(f)
+	if err != nil {
+		log.Printf("Invalid excel file: %v\n", err)
+		return items
+	}
+
+	rows, err := excelFile.GetRows("Sheet1")
+	if err != nil {
+		log.Printf("Cannot read sheet: %v\n", err)
+		return items
+	}
+
+	for i, row := range rows {
+		if i == 0 {
+			continue // skip header
+		}
+
+		price, _ := strconv.ParseFloat(row[3], 64)
+		quantity, _ := strconv.ParseInt(row[2], 10, 64)
+		view, _ := strconv.ParseInt(row[5], 10, 64)
+		recommend, _ := strconv.ParseInt(row[6], 10, 64)
+
+		item := entity.Item{
+			Name:        row[0],
+			Description: row[1],
+			Quantity:    quantity,
+			Price:       price,
+			Picture:     row[4],
+			View:        view,
+			Recommend:   recommend,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		}
+
+		items = append(items, item)
+	}
+
+	return items
 }
