@@ -5,13 +5,25 @@ import (
 	"log"
 	"os"
 
+	"be/pkg/db"
 	"be/services/items/model/entity"
 	"be/services/items/repository"
 
+	"github.com/joho/godotenv"
 	"github.com/streadway/amqp"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Could not load .env file", err)
+	}
+
+	db.New()
+	defer db.Close()
+
+	log.Print("Consumer is running...")
+
 	conn, _ := amqp.Dial(os.Getenv("RABBITMQ_URL"))
 	ch, _ := conn.Channel()
 	q, _ := ch.QueueDeclare(
