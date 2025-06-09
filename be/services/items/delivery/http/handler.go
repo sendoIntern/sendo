@@ -5,6 +5,7 @@ import (
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
 	"be/services/items/model/response"
+	"errors"
 	"log"
 
 	"be/pkg/rabbitmq"
@@ -132,20 +133,23 @@ func UploadExcelHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
 		return
 	}
-	items, errs := usecase.ParseExcel(file)
-	if errs != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"errors": errs,
-		})
-		return
+	var errs []error
+	items, parseErrs := usecase.ParseExcel(file)
+	if parseErrs != nil {
+		errs = append(errs, parseErrs...)
 	}
-
-	for i := range items {
-		item := items[i]
-		if err := rabbitmq.Publish(item); err != nil {
-			log.Printf(" Publish error: %v\n", err)
+	if len(items) != 0 {
+		for i := range items {
+			item := items[i]
+			if err := rabbitmq.Publish(item); err != nil {
+				log.Printf(" Publish error: %v\n", err)
+				errs = append(errs, errors.New("Publish item error:"+string(rune(i))+"__"+err.Error()))
+			}
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "imported to queue"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "imported to queue",
+		"errors":  errs,
+	})
 }
