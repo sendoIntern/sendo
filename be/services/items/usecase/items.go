@@ -96,26 +96,30 @@ func GetItemById(itemId string) (*entity.Item, error) {
 	return &item, nil
 }
 
-func ParseExcel(file *multipart.FileHeader) ([]entity.Item, error) {
+func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
 	var items []entity.Item
+	var errs []error
 
 	f, err := file.Open()
 	if err != nil {
 		log.Printf("Cannot open file: %v\n", err)
-		return items, errors.New("Cannot open file excel: " + err.Error())
+		errs = append(errs, errors.New("Cannot open file excel: "+err.Error()))
+		return items, errs
 	}
 	defer f.Close()
 
 	excelFile, err := excelize.OpenReader(f)
 	if err != nil {
 		log.Printf("Invalid excel file: %v\n", err)
-		return items, errors.New("Invalid file type: " + err.Error())
+		errs = append(errs, errors.New("Invalid file type: "+err.Error()))
+		return items, errs
 	}
 
 	rows, err := excelFile.GetRows("Sheet1")
 	if err != nil {
 		log.Printf("Cannot read sheet: %v\n", err)
-		return items, errors.New("Cannot read sheet: " + err.Error())
+		errs = append(errs, errors.New("Cannot read sheet: "+err.Error()))
+		return items, errs
 	}
 
 	for i, row := range rows {
@@ -126,6 +130,7 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, error) {
 		// Kiểm tra số lượng cột
 		if len(row) < 6 {
 			log.Printf("Row %d: Invalid number of columns, expected at least 6, got %d", i, len(row))
+			errs = append(errs, errors.New("Invalid columns at row:"+string(rune(i))))
 			continue
 		}
 
