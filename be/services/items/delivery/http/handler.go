@@ -161,5 +161,5 @@ func GetErrorItemsHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get error items: " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, items)
+	c.JSON(http.StatusOK, gin.H{"error_items": items})
 }

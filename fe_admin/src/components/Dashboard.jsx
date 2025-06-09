@@ -77,6 +77,14 @@ function Dashboard() {
       const res = await axiosInstance.post("/item/import", formData, {
         withCredentials: true,
       });
+      const isErr = await axiosInstance.get("/item/getErrorItems", {
+        withCredentials: true,
+      });
+
+      if (res.data && !isErr.data) {
+        window.alert("Import successful!");
+      }
+      window.alert("Import failed");
     } catch (error) {
       console.error("Error importing Excel file:", error);
     } finally {
