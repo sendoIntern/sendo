@@ -132,11 +132,12 @@ func UploadExcelHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
 		return
 	}
-	items, err := usecase.ParseExcel(file)
-	if err != nil {
+	items, errs := usecase.ParseExcel(file)
+	if errs != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"errors": errs,
 		})
+		return
 	}
 
 	for i := range items {
