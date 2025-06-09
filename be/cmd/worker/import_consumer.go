@@ -58,6 +58,7 @@ func main() {
 		if err := repository.CreateItem(item); err != nil {
 			log.Printf("Cannot create item: %v", err)
 			importErr.Description = "Cannot create item: " + err.Error()
+			repository.SaveError(importErr)
 			continue
 		}
 		log.Printf("Create item success: %s", item.Name)
