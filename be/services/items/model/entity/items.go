@@ -20,7 +20,6 @@ type Item struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-// auto generate uuid before save a new user into database
 func (item *Item) BeforeCreate(tx *gorm.DB) (err error) {
 	item.ID = uuid.New()
 	return
