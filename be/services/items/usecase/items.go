@@ -161,3 +161,13 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
 
 	return items, nil
 }
+
+
+func GetErrorItems() ([]entity.Item, error) {
+	var items []entity.Item
+	result := db.DB.Where("recommend = ?", 0).Find(&items)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return items, nil
+}
