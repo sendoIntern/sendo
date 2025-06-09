@@ -13,6 +13,6 @@ func ItemRoutes(r *gin.Engine) {
 		itemGroup.PUT("/:id", UpdateItemByIdHandler)
 		itemGroup.DELETE("/:id", DeleteItemHandler)
 		itemGroup.POST("/import", UploadExcelHandler)
-		itemGroup.GET("/getErrorItems", GetErrorItemsHandler)
+		itemGroup.GET("/getErrorItems", GetImportErrorsHandler)
 	}
 }

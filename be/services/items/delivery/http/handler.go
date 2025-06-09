@@ -154,12 +154,11 @@ func UploadExcelHandler(c *gin.Context) {
 	})
 }
 
-
-func GetErrorItemsHandler(c *gin.Context) {
-	items, err := usecase.GetErrorItems()
+func GetImportErrorsHandler(c *gin.Context) {
+	importErrs, err := usecase.GetErrorItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get error items: " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"error_items": items})
+	c.JSON(http.StatusOK, importErrs)
 }
