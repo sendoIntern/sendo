@@ -13,7 +13,7 @@ func SaveError(importErr entity.ImportError) error {
 }
 
 func DeleteError() error {
-	result := db.DB.Exec("")
+	result := db.DB.Exec("DELETE from import_errors")
 	if result.Error != nil {
 		return result.Error
 	}
