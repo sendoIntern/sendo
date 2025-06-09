@@ -123,10 +123,21 @@ func ParseExcel(file *multipart.FileHeader) []entity.Item {
 			continue // skip header
 		}
 
+		// Kiểm tra số lượng cột
+		if len(row) < 6 {
+			log.Printf("Row %d: Invalid number of columns, expected at least 6, got %d", i, len(row))
+			continue
+		}
+
 		price, _ := strconv.ParseFloat(row[3], 64)
 		quantity, _ := strconv.ParseInt(row[2], 10, 64)
 		view, _ := strconv.ParseInt(row[5], 10, 64)
-		recommend, _ := strconv.ParseInt(row[6], 10, 64)
+
+		// Mặc định recommend = 0 nếu không có cột 7
+		recommend := int64(0)
+		if len(row) > 6 {
+			recommend, _ = strconv.ParseInt(row[6], 10, 64)
+		}
 
 		item := entity.Item{
 			Name:        row[0],
