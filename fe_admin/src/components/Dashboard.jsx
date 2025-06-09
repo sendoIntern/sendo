@@ -68,22 +68,22 @@ function Dashboard() {
     }
   };
 
-  // const handleImmportExcel = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("file", fileImport);
+  const handleImmportExcel = async () => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", fileImport);
 
-  //     // await axiosInstance.post("/item/importExcel", formData, {
-  //     //   withCredentials: true,
-  //     // });
-  //   } catch (error) {
-  //     console.error("Error importing Excel file:", error);
-  //   } finally {
-  //     fetchProducts();
-  //     setLoading(false);
-  //   }
-  // };
+      const res = await axiosInstance.post("/item/import", formData, {
+        withCredentials: true,
+      });
+    } catch (error) {
+      console.error("Error importing Excel file:", error);
+    } finally {
+      fetchProducts();
+      setLoading(false);
+    }
+  };
 
   const handleCreateItem = async () => {
     setLoading(true);
@@ -140,7 +140,7 @@ function Dashboard() {
             }}
           ></input>
           <br />
-          {/* <button onClick={handleImmportExcel()}>submit</button> */}
+          <button onClick={() => handleImmportExcel()}>submit</button>
         </>
       )}
 
