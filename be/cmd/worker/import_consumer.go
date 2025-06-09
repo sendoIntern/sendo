@@ -45,15 +45,19 @@ func main() {
 		nil,
 	)
 
+	var importErr entity.ImportError
 	for msg := range msgs {
 		var item entity.Item
 		if err := json.Unmarshal(msg.Body, &item); err != nil {
 			log.Printf("Error parse message: %v", err)
+			importErr.Description = "Cannot unmarshal from message: " + err.Error()
+			repository.SaveError(importErr)
 			continue
 		}
 
 		if err := repository.CreateItem(item); err != nil {
 			log.Printf("Cannot create item: %v", err)
+			importErr.Description = "Cannot create item: " + err.Error()
 			continue
 		}
 		log.Printf("Create item success: %s", item.Name)
