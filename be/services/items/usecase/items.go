@@ -96,26 +96,26 @@ func GetItemById(itemId string) (*entity.Item, error) {
 	return &item, nil
 }
 
-func ParseExcel(file *multipart.FileHeader) []entity.Item {
+func ParseExcel(file *multipart.FileHeader) ([]entity.Item, error) {
 	var items []entity.Item
 
 	f, err := file.Open()
 	if err != nil {
 		log.Printf("Cannot open file: %v\n", err)
-		return items
+		return items, errors.New("Cannot open file excel: " + err.Error())
 	}
 	defer f.Close()
 
 	excelFile, err := excelize.OpenReader(f)
 	if err != nil {
 		log.Printf("Invalid excel file: %v\n", err)
-		return items
+		return items, errors.New("Invalid file type: " + err.Error())
 	}
 
 	rows, err := excelFile.GetRows("Sheet1")
 	if err != nil {
 		log.Printf("Cannot read sheet: %v\n", err)
-		return items
+		return items, errors.New("Cannot read sheet: " + err.Error())
 	}
 
 	for i, row := range rows {
@@ -154,5 +154,5 @@ func ParseExcel(file *multipart.FileHeader) []entity.Item {
 		items = append(items, item)
 	}
 
-	return items
+	return items, nil
 }
