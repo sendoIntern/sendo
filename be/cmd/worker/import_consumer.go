@@ -22,8 +22,6 @@ func main() {
 	db.New()
 	defer db.Close()
 
-	log.Print("Consumer is running...")
-
 	conn, _ := amqp.Dial(os.Getenv("RABBITMQ_URL"))
 	ch, _ := conn.Channel()
 	q, _ := ch.QueueDeclare(
@@ -44,6 +42,8 @@ func main() {
 		false,
 		nil,
 	)
+
+	log.Print("Consumer is running...")
 
 	var importErr entity.ImportError
 	for msg := range msgs {
