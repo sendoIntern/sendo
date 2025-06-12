@@ -12,6 +12,7 @@ type User struct {
 	Name      string
 	Email     string `gorm:"unique"`
 	Picture   string
+	Role      string
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
