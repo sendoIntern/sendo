@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// check global variable - use singleton pattern
 var DB *gorm.DB
 
 // New một instance mới của DB với giá trị từ .env
