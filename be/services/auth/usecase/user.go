@@ -20,11 +20,12 @@ func GenerateToken(user entity.User) (string, error) {
 		"user_id": user.ID.String(),
 		"email":   user.Email,
 		"name":    user.Name,
+		"role":    user.Role,
 		"exp":     time.Now().Add(time.Hour).Unix(),
 	})
 
-//tạo token
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))	
+	//tạo token
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
 		return "", err
 	}
@@ -45,6 +46,7 @@ func Login(req request.LoginRequest) (responce.LoginResponse, string, error) {
 				Name:    req.Name,
 				Email:   req.Email,
 				Picture: req.Picture,
+				Role:    "user",
 			}
 			if err := db.DB.Create(&user).Error; err != nil {
 				return responce.LoginResponse{}, "", errors.New("failed to create user: " + err.Error())
