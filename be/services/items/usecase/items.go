@@ -174,3 +174,13 @@ func GetErrorItems() ([]entity.ImportError, error) {
 	}
 	return errs, nil
 }
+
+
+func GetItemDesc() ([]entity.Item, error) {
+	// Lấy 3 item có view cao nhất
+	result, err := repository.GetTopViewedItems()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

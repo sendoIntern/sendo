@@ -162,3 +162,16 @@ func GetImportErrorsHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, importErrs)
 }
+
+func GetItemDescHandler(c *gin.Context) {
+	itemDesc, err := usecase.GetItemDesc()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get item description: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Get items successfully",
+		"items":   itemDesc,
+	})
+}

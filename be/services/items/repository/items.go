@@ -41,3 +41,12 @@ func IsExistItem(id uuid.UUID) (entity.Item, bool) {
 	}
 	return item, true
 }
+
+// lấy 3 item có view cao nhất
+func GetTopViewedItems() ([]entity.Item, error) {
+	var items []entity.Item
+	if err := db.DB.Order("view DESC").Limit(3).Find(&items).Error; err != nil {
+		return nil, err
+	}
+	return items, nil
+}

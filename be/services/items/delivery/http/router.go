@@ -14,5 +14,7 @@ func ItemRoutes(r *gin.Engine) {
 		itemGroup.DELETE("/:id", DeleteItemHandler)
 		itemGroup.POST("/import", UploadExcelHandler)
 		itemGroup.GET("/getErrorItems", GetImportErrorsHandler)
+
+		itemGroup.GET("/getItemDesc", GetItemDescHandler)  // lấy 3 item có view cao nhất
 	}
 }
