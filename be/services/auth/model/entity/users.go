@@ -10,9 +10,9 @@ import (
 type User struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name      string
-	Email     string `gorm:"unique"`
+	Email     string 	`gorm:"unique"`
 	Picture   string
-	Role      string
+	Role      string 	`gorm:"default:'user'"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

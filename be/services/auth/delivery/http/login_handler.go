@@ -18,7 +18,7 @@ func LoginHandler(c *gin.Context) {
         })
         return
     }
-	res, token, err := usecase.Login(req)
+	res, accessToken, refreshToken, err := usecase.Login(req)
 	if err != nil {c.JSON(http.StatusInternalServerError, gin.H{
 		"error": err.Error(),
 	})
@@ -26,6 +26,7 @@ func LoginHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
         "data":  res,
-        "token": token,
+        "accessToken": accessToken,
+		"refreshToken": refreshToken,
     })
 }
