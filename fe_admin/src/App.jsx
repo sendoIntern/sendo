@@ -1,9 +1,8 @@
 import { Route, Routes } from "react-router-dom";
-import Menuu from "./components/Menuu";
-import Dashboard from "./components/Dashboard";
-import Product from "./components/Product";
-import Login from "./components/Login";
 import { auth } from "./lib/auth";
+import Product from "./pages/Product";
+import Dashboard from "./pages/Dashboard";
+
 function App() {
   const role = auth.getRole();
   return (
@@ -20,6 +19,7 @@ function App() {
       /> */}
       {/* <Route path="/menuu" element={role === "admin" ? <Menuu /> : <Login />} /> */}
       <Route path="/product" element={<Product />} />
+      <Route path="/" element={<Dashboard />} />
     </Routes>
   );
 }

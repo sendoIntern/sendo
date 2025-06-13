@@ -6,10 +6,6 @@ import {
   CardMedia,
   Typography,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import { axiosInstance } from "../lib/axios";
 
@@ -62,22 +58,31 @@ function CardItem() {
   return (
     <Box
       sx={{
+        mt: 5,
         display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "space-around",
-        gap: "20px",
-        padding: 2,
+        flexWrap: "wrap", // tự động xuống dòng
+        justifyContent: "center", // căn giữa
+        gap: 3,
+        px: 2,
+        overflowX: "hidden", // ẩn thanh cuộn ngang
+        width: "100%", // giới hạn trong viewport
       }}
     >
       {data.map((item) => (
-        <Card key={item.id} sx={{ width: 300 }}>
+        <Card
+          key={item.id}
+          sx={{
+            width: { xs: "100%", sm: 250, md: 300 },
+            flexShrink: 0,
+          }}
+        >
           <CardMedia
             component="img"
             height="180"
             image={item.picture}
             alt={item.name}
             onClick={() => showModal(item)}
-            sx={{ cursor: "pointer" }}
+            sx={{ cursor: "pointer", objectFit: "cover" }}
           />
           <CardContent
             onClick={() => showModal(item)}
@@ -89,7 +94,15 @@ function CardItem() {
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ height: "100px", mt: 1 }}
+              sx={{
+                height: "100px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                mt: 1,
+              }}
             >
               {item.description}
             </Typography>
@@ -97,61 +110,11 @@ function CardItem() {
               Price: {item.price}
             </Typography>
           </CardContent>
-          <Button
-            variant="outlined"
-            fullWidth
-            sx={{ color: "blue", mt: 1 }}
-            onClick={() => console.log("Buy:", item)}
-          >
+          <Button variant="outlined" fullWidth sx={{ color: "blue", mt: 1 }}>
             Buy
           </Button>
         </Card>
       ))}
-
-      <Dialog open={isModalOpen} onClose={handleCancel} maxWidth="sm" fullWidth>
-        <DialogTitle>Chi tiết sản phẩm</DialogTitle>
-        <DialogContent dividers>
-          {selectedItem && (
-            <Card>
-              <CardMedia
-                component="img"
-                height="200"
-                image={selectedItem.picture}
-                alt={selectedItem.name}
-              />
-              <CardContent>
-                <Typography variant="h6" align="center">
-                  {selectedItem.name}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ height: "100px", mt: 1 }}
-                >
-                  {selectedItem.description}
-                </Typography>
-                <Typography
-                  variant="subtitle1"
-                  color="text.primary"
-                  sx={{ mt: 1 }}
-                >
-                  Price: {selectedItem.price}
-                </Typography>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  sx={{ color: "blue", mt: 2 }}
-                >
-                  Buy
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleOk}>Đóng</Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

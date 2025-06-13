@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { axiosInstance } from "../lib/axios";
-import Carousell from "./Carousell";
-import CardItem from "./CardItem";
+import Banner from "../components/Banner";
+import CardItem from "../components/CardItem";
+import Nav from "../components/Nav";
 function Product() {
   return (
     <>
-      <Carousell />
+      <Nav />
+      <Banner />
       <CardItem />
     </>
   );
