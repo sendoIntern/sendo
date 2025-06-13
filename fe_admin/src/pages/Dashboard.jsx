@@ -133,6 +133,7 @@ function Dashboard() {
       } else {
         alert("Import failed");
       }
+      console.log(formData);
     } catch (error) {
       console.error("Error importing Excel file:", error);
     } finally {
@@ -154,26 +155,20 @@ function Dashboard() {
         New
       </Button>
 
-      <Button
-        variant="outlined"
-        onClick={() => setShowImportFile(!showImportFile)}
-      >
-        {showImportFile ? "Close" : "Import file excel"}
+      <Button variant="outlined" component="label" sx={{ mr: 2 }}>
+        Import Excel
+        <input
+          type="file"
+          accept=".xlsx"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            setFileImport(file);
+            handleImmportExcel();
+          }}
+        />
       </Button>
-
-      {showImportFile && (
-        <>
-          <input
-            type="file"
-            accept=".xlsx"
-            onChange={(e) => setFileImport(e.target.files[0] || null)}
-          />
-          <br />
-          <Button variant="contained" onClick={handleImmportExcel}>
-            Submit Import
-          </Button>
-        </>
-      )}
 
       {/* CREATE MODAL */}
       <Modal open={showCreateForm} onClose={() => setShowCreateForm(false)}>
