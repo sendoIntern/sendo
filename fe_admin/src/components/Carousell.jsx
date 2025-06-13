@@ -1,28 +1,58 @@
-import { Carousel } from "antd";
+import React, { useEffect, useState } from "react";
+import Slider from "react-slick";
+import { axiosInstance } from "../lib/axios";
+import { Box, Typography, Card, CardContent, CardMedia } from "@mui/material";
+
 function Carousell() {
-  const contentStyle = {
-    height: "220px",
-    color: "#fff",
-    lineHeight: "220px",
-    textAlign: "center",
-    background: "#364d79",
+  const [items, setItems] = useState([]);
+
+  // useEffect(() => {
+  //   const fetchItems = async () => {
+  //     try {
+  //       const response = await axiosInstance.get("/items/get3Items", {
+  //         withCredentials: true,
+  //       });
+  //       setItems(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching items:", error);
+  //     }
+  //   };
+  //   fetchItems();
+  // }, []);
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    slidesToShow: 1,
+    slidesToScroll: 1,
   };
 
   return (
-    <Carousel autoplay>
-      <div>
-        <h3 style={contentStyle}>1</h3>
-      </div>
-      <div>
-        <h3 style={contentStyle}>2</h3>
-      </div>
-      <div>
-        <h3 style={contentStyle}>3</h3>
-      </div>
-      <div>
-        <h3 style={contentStyle}>4</h3>
-      </div>
-    </Carousel>
+    <Box sx={{ maxWidth: 800, margin: "0 auto", mt: 4 }}>
+      <Slider {...settings}>
+        {items.map((item, index) => (
+          <Box key={index} px={2}>
+            <Card>
+              <CardMedia
+                component="img"
+                height="220"
+                image={item.picture}
+                alt={item.name}
+              />
+              <CardContent sx={{ textAlign: "center" }}>
+                <Typography variant="h6">{item.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {item.description}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        ))}
+      </Slider>
+    </Box>
   );
 }
 
