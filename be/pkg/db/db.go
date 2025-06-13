@@ -2,6 +2,7 @@ package db
 
 import (
 	"be/services/auth/model/entity"
+	itemsEntity "be/services/items/model/entity"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// check global variable - use singleton pattern
 var DB *gorm.DB
 
 // New một instance mới của DB với giá trị từ .env
@@ -33,7 +35,8 @@ func New() {
 	// Tự động tạo bảng nếu chưa có
 	err = DB.AutoMigrate(
 		&entity.User{},
-		// &entity.Item{},
+		&itemsEntity.Item{},
+		&itemsEntity.ImportError{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
