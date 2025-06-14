@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import { axiosInstance } from "../lib/axios";
 import { Table } from "antd";
 import Nav from "../components/Nav";
-import { Button, Modal, Box, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  Modal,
+  Box,
+  TextField,
+  Typography,
+  Stack,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
 
@@ -23,8 +30,8 @@ function Dashboard() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [modalUpdateForm, setModalUpdateForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [fileImport, setFileImport] = useState(null);
-  const [showImportFile, setShowImportFile] = useState(false);
+  const [fileImport, setFileImport] = useState(false);
+  // const [showImportFile, setShowImportFile] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [newItem, setNewItem] = useState({
@@ -114,11 +121,13 @@ function Dashboard() {
     }
   };
 
-  const handleImmportExcel = async () => {
+  const handleImmportExcel = async (file) => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("file", fileImport);
+      formData.append("file", file);
+
+      console.log("Uploading file:", file.name);
 
       await axiosInstance.post("/item/import", formData, {
         withCredentials: true,
@@ -133,7 +142,6 @@ function Dashboard() {
       } else {
         alert("Import failed");
       }
-      console.log(formData);
     } catch (error) {
       console.error("Error importing Excel file:", error);
     } finally {
@@ -165,10 +173,25 @@ function Dashboard() {
             const file = e.target.files[0];
             if (!file) return;
             setFileImport(file);
-            handleImmportExcel();
+            handleImmportExcel(file);
           }}
         />
       </Button>
+
+      {fileImport && (
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
+          <Typography variant="body2">
+            Selected file: {fileImport.name}
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={() => setFileImport(null)}
+            aria-label="remove selected file"
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+      )}
 
       {/* CREATE MODAL */}
       <Modal open={showCreateForm} onClose={() => setShowCreateForm(false)}>
@@ -220,11 +243,21 @@ function Dashboard() {
               type="file"
               hidden
               accept="image/*"
-              onChange={(e) =>
-                setNewItem({ ...newItem, picture: e.target.files[0] })
-              }
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                setNewItem({ ...newItem, picture: file });
+              }}
             />
           </Button>
+
+          {/* Hiển thị tên file nếu đã chọn */}
+          {newItem.picture && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Selected file: {newItem.picture.name}
+            </Typography>
+          )}
+
           <Button
             variant="contained"
             fullWidth

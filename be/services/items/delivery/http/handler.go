@@ -75,6 +75,8 @@ func CreateItemHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Item created", "item": resp})
 }
 
+
+
 func DeleteItemHandler(c *gin.Context) {
 	id := c.Param("id")
 

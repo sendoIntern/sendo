@@ -11,7 +11,9 @@ func ItemRoutes(r *gin.Engine) {
 	{
 		itemGroup.GET("/getAllItems", GetAllItemsHandler)
 		itemGroup.GET("/getItemById/:itemId", middleware.ItemIDMiddleware(), GetItemByIdHandler)
-		itemGroup.POST("/createNewItem", middleware.ValidateItemFields(), CreateItemHandler)
+		// itemGroup.POST("/createNewItem", middleware.ValidateItemFields(), CreateItemHandler)
+		itemGroup.POST("/createNewItem",  CreateItemHandler)
+		
 		itemGroup.PUT("/:id", middleware.ValidateItemFields(), UpdateItemByIdHandler)
 		itemGroup.DELETE("/:id",middleware.ItemIDMiddleware(),  DeleteItemHandler)
 		itemGroup.POST("/import", UploadExcelHandler)
