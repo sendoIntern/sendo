@@ -10,16 +10,16 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import GoogleIcon from "@mui/icons-material/Google";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [, setUserInfor] = useState(null);
+  const navigate = useNavigate();
   const bull = (
     <Box
       component="span"
       sx={{ display: "inline-block", mx: "2px", transform: "scale(0.8)" }}
-    >
-      •
-    </Box>
+    ></Box>
   );
 
   const login = useGoogleLogin({
@@ -34,7 +34,6 @@ const Login = () => {
           }
         );
         setUserInfor(res.data);
-        console.log("Data của FE", res.data);
 
         const responce = await axiosInstance.post("/auth/login", {
           name: res.data.name,
@@ -42,8 +41,8 @@ const Login = () => {
           picture: res.data.picture,
         });
 
-        console.log("Data từ Be:", responce.data);
-        localStorage.setItem("token", responce.data.token);
+        localStorage.setItem("accessToken", responce.data.accessToken);
+        navigate("/product");
       } catch (err) {
         console.error("Lỗi đăng nhập", err);
       }
@@ -80,15 +79,15 @@ const Login = () => {
           noValidate
           autoComplete="off"
         >
-          <TextField id="outlined-basic" label="Username" variant="outlined" />{" "}
+          <TextField id="login-username" label="Username" variant="outlined" />
           <br />
           <TextField
-            id="outlined-basic"
+            id="login-password"
             label="Password"
             type="password"
             variant="outlined"
           />
-        </Box>{" "}
+        </Box>
         <CardActions sx={{ justifyContent: "center" }}>
           <Button size="small" variant="contained" color="primary">
             Đăng nhập

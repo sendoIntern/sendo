@@ -1,25 +1,21 @@
-import { Route, Routes } from "react-router-dom";
-import { auth } from "./lib/auth";
+import { Routes, Route } from "react-router-dom";
 import Product from "./pages/Product";
 import Dashboard from "./pages/Dashboard";
 
+import Login from "./pages/Login";
+import RoleRoute from "./components/RoleRoute";
+
 function App() {
-  const role = auth.getRole();
   return (
     <Routes>
-      // check role để render các route khác nhau
-      {/* <Route path="/" element={role === "admin" ? <Login /> : <Login />} /> */}
-      {/* <Route
-        path="/product"
-        element={role === "admin" ? <Product /> : <Login />}
-      /> */}
-      {/* <Route
-        path="/dashboard"
-        element={role === "admin" ? <Dashboard /> : <Login />}
-      /> */}
-      {/* <Route path="/menuu" element={role === "admin" ? <Menuu /> : <Login />} /> */}
-      <Route path="/product" element={<Product />} />
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<Login />} />
+      {/* Routes dành cho user */}
+      <Route element={<RoleRoute allowRoles={["user"]} />}>
+        <Route path="/product" element={<Product />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Route>
+
+      <Route path="*" element={<Login />} />
     </Routes>
   );
 }

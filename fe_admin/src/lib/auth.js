@@ -1,8 +1,7 @@
 export const auth = {
   // phân rã token lấy role từ localStorage
   getRole: () => {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
+    const token = localStorage.getItem("accessToken");
 
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
@@ -14,7 +13,7 @@ export const auth = {
   },
 
   getUser: () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     if (!token) return null;
 
     try {

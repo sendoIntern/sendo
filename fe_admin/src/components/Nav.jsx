@@ -53,7 +53,7 @@ const Nav = () => {
         {/* Menu bên trái */}
         <Box sx={{ display: "flex", gap: 4 }}>
           <Typography
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/dashboard")}
             sx={{
               cursor: "pointer",
               px: 2,
