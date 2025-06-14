@@ -45,6 +45,7 @@ func main() {
 
 	authUserHttp.AuthRoutes(router)
 	itemHttp.ItemRoutes(router)
+
 	// auth := route.Group("/auth")
 	// {
 	// 	auth.POST("/login", handler.LoginHandler)

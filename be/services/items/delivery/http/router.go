@@ -10,7 +10,9 @@ func ItemRoutes(r *gin.Engine) {
 	itemGroup := r.Group("/item")
 	{
 		itemGroup.GET("/getAllItems", GetAllItemsHandler)
-		itemGroup.GET("/getItemById/:itemId", middleware.ItemIDMiddleware(), GetItemByIdHandler)
+		// itemGroup.GET("/getItemById/:itemId", middleware.ItemIDMiddleware(), GetItemByIdHandler)
+		itemGroup.GET("/getItemById/:itemId", GetItemByIdHandler)
+		
 		// itemGroup.POST("/createNewItem", middleware.ValidateItemFields(), CreateItemHandler)
 		itemGroup.POST("/createNewItem",  CreateItemHandler)
 		
