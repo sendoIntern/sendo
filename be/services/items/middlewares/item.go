@@ -9,29 +9,13 @@ import (
 	"be/pkg/db"
 	"be/services/items/model/entity"
 	"errors"
-
-	"github.com/google/uuid"
 )
 
 // function kiểm tra ID trước khi gọi handlers
 func ItemIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.Request.Method == "GET" && c.FullPath() == "/item/getItemById/:itemId" {
+		id := c.Param("itemId")
 		
-		id := c.Param("id")
-		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
-			c.Abort()
-			return
-		}
-
-		// Kiểm tra định dạng UUID
-		if _, err := uuid.Parse(id); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
-			c.Abort()
-			return
-		}
-	
 		// Kiểm tra xem item có tồn tại không
 		var item entity.Item
 		result := db.DB.First(&item, "id = ?", id)
@@ -44,7 +28,6 @@ func ItemIDMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-	}
 		c.Next()
 	}
 }
@@ -52,7 +35,6 @@ func ItemIDMiddleware() gin.HandlerFunc {
 // check input của item có hợp lệ không
 func ValidateItemFields() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.Request.Method == "POST" && c.FullPath() == "/item/createNewItem" {
 			name := c.PostForm("name")
 			price := c.PostForm("price")
 			quantity := c.PostForm("quantity")
@@ -74,8 +56,22 @@ func ValidateItemFields() gin.HandlerFunc {
 				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Description is required"})
 				return
 			}
-		}
 
+		c.Next()
+	}
+}
+
+
+func RequireExcelFileMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		_, err := c.FormFile("file")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "file is required",
+			})
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }
