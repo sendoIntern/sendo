@@ -2,6 +2,7 @@ package http
 
 import (
 	"be/pkg/db"
+	"be/pkg/pagination"
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
 	"be/services/items/model/response"
@@ -18,13 +19,32 @@ import (
 )
 
 func GetAllItemsHandler(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
 
-	items, err := usecase.GetAllItems()
+	page, _ := strconv.Atoi(pageStr)
+	limit, _ := strconv.Atoi(limitStr)
+
+	paging := pagination.Paging{
+		Page:   page,
+		Limit:  limit,
+		Offset: (page - 1) * limit,
+	}
+
+	items, err := usecase.GetAllItems(&paging)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get items: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, response.APIResponse{
+			Status:  "Fail",
+			Message: "Cannot get items",
+			Error:   err.Error(),
+		})
 		return
 	}
-	c.JSON(http.StatusOK, items)
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:     "Success",
+		Pagination: paging,
+		Data:       items,
+	})
 
 }
 

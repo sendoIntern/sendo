@@ -3,6 +3,7 @@ package usecase
 import (
 	"be/pkg/cloudinary"
 	"be/pkg/db"
+	"be/pkg/pagination"
 	"be/services/items/model/entity"
 
 	"be/services/items/model/request"
@@ -77,12 +78,12 @@ func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error)
 	return item, nil
 }
 
-func GetAllItems() ([]entity.Item, error) {
-	var items []entity.Item
-	result := db.DB.Find(&items)
-	if result.Error != nil {
-		return nil, result.Error
+func GetAllItems(p *pagination.Paging) ([]entity.Item, error) {
+	items, err := repository.FetchItems(p)
+	if err != nil {
+		return items, err
 	}
+
 	return items, nil
 }
 
@@ -174,7 +175,6 @@ func GetErrorItems() ([]entity.ImportError, error) {
 	}
 	return errs, nil
 }
-
 
 func GetItemDesc() ([]entity.Item, error) {
 	// Lấy 3 item có view cao nhất
