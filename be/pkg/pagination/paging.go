@@ -1,12 +1,13 @@
 package pagination
 
 type Paging struct {
-	Page  int64 `json:"page"`
-	Limit int64 `json:"limit"`
-	Total int64 `json:"total"`
+	Page   int   `json:"page"`
+	Limit  int   `json:"limit"`
+	Offset int   `json:"offset"`
+	Total  int64 `json:"total"`
 }
 
-func (p *Paging) process() {
+func (p *Paging) Process() {
 	if p.Page < 1 {
 		p.Page = 1
 	}
