@@ -37,7 +37,6 @@ function CardItem() {
           withCredentials: true,
         });
         setData(res.data);
-        setTotalPages(res.data.totalPages);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -135,7 +134,7 @@ function CardItem() {
             width: "100%",
           }}
         >
-          {data
+          {data?.data
             .filter((item) => {
               const matchesSearch = item.name
                 .toLowerCase()
