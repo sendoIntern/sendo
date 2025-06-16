@@ -44,6 +44,7 @@ func New() {
 	}
 
 	log.Println("Connect database successful!")
+	log.Println("Server on PORT:", "8080")
 }
 
 // đóng kết nối database
