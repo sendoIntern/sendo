@@ -2,13 +2,18 @@ package middlewares
 
 import (
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
 	"be/pkg/db"
+	"be/services/auth/model/request"
 	"be/services/items/model/entity"
 	"errors"
+
+	jwt "be/services/items/utils"
 )
 
 // function kiểm tra ID trước khi gọi handlers
@@ -75,3 +80,63 @@ func RequireExcelFileMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+//validate access token
+func ValidateAccessToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
+			c.Abort()
+			return
+		}
+
+		// Loại bỏ tiền tố "Bearer "
+		splitToken := strings.Split(authHeader, " ")
+		if len(splitToken) != 2 || splitToken[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header format"})
+			c.Abort()
+			return
+		}
+		token := splitToken[1]
+
+		// Xác thực token
+		_, err := jwt.VerifyToken(token, []byte(os.Getenv("JWT_SECRET_ACCESSTOKEN")))
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid access token: " + err.Error()})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+	
+
+
+// validate refresh token lấy từ body request
+
+func ValidateRefreshToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req request.RefreshTokenRequest
+		// fmt.Println("ValidateRefreshToken middleware called"+ req.RefreshToken)
+		if err := c.ShouldBindJSON(&req); err != nil || req.RefreshToken == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token is required"})
+			c.Abort()
+			return
+		}
+
+		decoded, err := jwt.VerifyToken(req.RefreshToken, []byte(os.Getenv("JWT_SECRET_REFRESHTOKEN")))
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token: " + err.Error()})
+			c.Abort()
+			return
+		}
+
+		c.Set("refreshToken", req) // Lưu refresh token vào context nếu cần thiết
+		c.Set("claims", decoded) 
+		c.Next()
+	}
+}
+
+

@@ -11,6 +11,9 @@ function Banner() {
     const fetchItems = async () => {
       try {
         const response = await axiosInstance.get("/item/getItemDesc", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
           withCredentials: true,
         });
         // Giả sử API trả về mảng trực tiếp

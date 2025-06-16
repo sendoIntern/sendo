@@ -21,6 +21,9 @@ function CardItem() {
     const fetchProducts = async () => {
       try {
         const res = await axiosInstance.get("/item/getAllItems", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
           withCredentials: true,
         });
         setData(res.data);
@@ -33,7 +36,12 @@ function CardItem() {
 
   const fetchDataByid = async (id) => {
     try {
-      const res = await axiosInstance.get(`/item/getItemById/${id}`);
+      const res = await axiosInstance.get(`/item/getItemById/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        withCredentials: true,
+      });
       setSelectedItem(res.data);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -42,7 +50,6 @@ function CardItem() {
 
   const showModal = (item) => {
     setSelectedItem(item);
-    console.log(item.id);
     fetchDataByid(item.id);
     setIsModalOpen(true);
   };
