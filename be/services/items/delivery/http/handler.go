@@ -18,6 +18,7 @@ import (
 )
 
 func GetAllItemsHandler(c *gin.Context) {
+
 	items, err := usecase.GetAllItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get items: " + err.Error()})
@@ -74,8 +75,6 @@ func CreateItemHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item created", "item": resp})
 }
-
-
 
 func DeleteItemHandler(c *gin.Context) {
 	id := c.Param("id")
