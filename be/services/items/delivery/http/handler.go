@@ -26,9 +26,8 @@ func GetAllItemsHandler(c *gin.Context) {
 	limit, _ := strconv.Atoi(limitStr)
 
 	paging := pagination.Paging{
-		Page:   page,
-		Limit:  limit,
-		Offset: (page - 1) * limit,
+		Page:  page,
+		Limit: limit,
 	}
 
 	items, err := usecase.GetAllItems(&paging)

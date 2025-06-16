@@ -5,11 +5,11 @@ import (
 	"be/pkg/db"
 	"be/pkg/pagination"
 	"be/services/items/model/entity"
-
 	"be/services/items/model/request"
 	"be/services/items/repository"
 	"errors"
 	"log"
+	"math"
 	"mime/multipart"
 	"strconv"
 	"time"
@@ -83,7 +83,8 @@ func GetAllItems(p *pagination.Paging) ([]entity.Item, error) {
 	if err != nil {
 		return items, err
 	}
-
+	p.Offset = (p.Page - 1) * p.Limit
+	p.TotalPages = int(math.Ceil(float64(p.Total) / float64(p.Limit)))
 	return items, nil
 }
 
