@@ -11,14 +11,14 @@ func ItemRoutes(r *gin.Engine) {
 	{
 		itemGroup.GET("/getAllItems", middleware.ValidateAccessToken(), GetAllItemsHandler)
 		itemGroup.GET("/getItemById/:itemId", middleware.ValidateAccessToken(), middleware.ItemIDMiddleware(), GetItemByIdHandler)
-		
+
 		itemGroup.POST("/createNewItem", middleware.ValidateItemFields(), CreateItemHandler)
-		
-		itemGroup.PUT("/:id", middleware.ValidateAccessToken(),middleware.ValidateItemFields(), UpdateItemByIdHandler)
+
+		itemGroup.PUT("/:id", middleware.ValidateAccessToken(), middleware.ValidateItemFields(), UpdateItemByIdHandler)
 		itemGroup.DELETE("/:id", middleware.ValidateAccessToken(), middleware.ItemIDMiddleware(), DeleteItemHandler)
 		itemGroup.POST("/import", middleware.ValidateAccessToken(), middleware.RequireExcelFileMiddleware(), UploadExcelHandler)
 		itemGroup.GET("/getErrorItems", middleware.ValidateAccessToken(), GetImportErrorsHandler)
 
-		itemGroup.GET("/getItemDesc", middleware.ValidateAccessToken(), GetItemDescHandler)  // lấy 3 item có view cao nhất
+		itemGroup.GET("/getItemDesc", middleware.ValidateAccessToken(), GetItemDescHandler) // lấy 3 item có view cao nhất
 	}
 }

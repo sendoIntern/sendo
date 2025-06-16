@@ -2,6 +2,7 @@ package repository
 
 import (
 	"be/pkg/db"
+	"be/pkg/pagination"
 	"be/services/items/model/entity"
 	"errors"
 
@@ -48,5 +49,27 @@ func GetTopViewedItems() ([]entity.Item, error) {
 	if err := db.DB.Order("view DESC").Limit(3).Find(&items).Error; err != nil {
 		return nil, err
 	}
+	return items, nil
+}
+
+func FetchItems(p *pagination.Paging) ([]entity.Item, error) {
+	var items []entity.Item
+
+	// Đếm tổng số dòng
+	if err := db.DB.Model(&entity.Item{}).Count(&p.Total).Error; err != nil {
+		return nil, err
+	}
+
+	// Truy vấn có paging
+	err := db.DB.
+		Limit(p.Limit).
+		Offset(p.Offset).
+		Order("created_at DESC").
+		Find(&items).Error
+
+	if err != nil {
+		return nil, err
+	}
+
 	return items, nil
 }
