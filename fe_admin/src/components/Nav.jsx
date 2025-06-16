@@ -9,17 +9,17 @@ import {
   IconButton,
   Typography,
   Tooltip,
+  TextField,
 } from "@mui/material";
 import Logout from "@mui/icons-material/Logout";
 import { useLocation, useNavigate } from "react-router-dom";
-import { auth } from "../lib/auth";
 
 const Nav = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
   const location = useLocation(); // để lấy route hiện tại
-
+  const [searchTerm, setSearchTerm] = React.useState("");
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -27,7 +27,8 @@ const Nav = () => {
     setAnchorEl(null);
   };
   const handleLogout = () => {
-    auth.logout();
+    localStorage.removeItem("accessToken");
+    navigate("/login");
   };
 
   // Helper kiểm tra route hiện tại
@@ -91,23 +92,24 @@ const Nav = () => {
           </Typography>
         </Box>
 
-        {/* Avatar bên phải */}
-        <Tooltip title="Account settings">
-          <IconButton
-            onClick={handleClick}
-            size="small"
-            sx={{
-              ml: 2,
-              border: "2px solid transparent",
-              "&:hover": {
-                bgcolor: "#e3f2fd",
-                border: "2px solid #1976d2",
-              },
-            }}
-          >
-            <Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
-          </IconButton>
-        </Tooltip>
+        {/* Search + Avatar */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Tooltip title="Account settings">
+            <IconButton
+              onClick={handleClick}
+              size="small"
+              sx={{
+                border: "2px solid transparent",
+                "&:hover": {
+                  bgcolor: "#e3f2fd",
+                  border: "2px solid #1976d2",
+                },
+              }}
+            >
+              <Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
       <Menu

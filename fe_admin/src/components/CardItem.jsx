@@ -6,7 +6,13 @@ import {
   CardMedia,
   Typography,
   Button,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
+
 import { axiosInstance } from "../lib/axios";
 
 import { Modal, IconButton } from "@mui/material";
@@ -16,6 +22,10 @@ function CardItem() {
   const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [totalPages, setTotalPages] = useState(10);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,6 +37,7 @@ function CardItem() {
           withCredentials: true,
         });
         setData(res.data);
+        setTotalPages(res.data.totalPages);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -66,6 +77,142 @@ function CardItem() {
 
   return (
     <>
+      {/* Layout chia 2 cột */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+          px: 2,
+          mt: 4,
+        }}
+      >
+        {/* Cột trái: Filter + Search */}
+        <Box
+          sx={{
+            minWidth: 250,
+            maxWidth: 300,
+            mr: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+        >
+          <TextField
+            label="Search by name"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            fullWidth
+          />
+          <Typography variant="subtitle1">Filter by Price</Typography>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <TextField
+              label="Min Price"
+              type="number"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              fullWidth
+            />
+            <TextField
+              label="Max Price"
+              type="number"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              fullWidth
+            />
+          </Box>
+        </Box>
+
+        {/* Cột phải: Danh sách sản phẩm */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 3,
+            overflowX: "hidden",
+            width: "100%",
+          }}
+        >
+          {data
+            .filter((item) => {
+              const matchesSearch = item.name
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase());
+
+              const price = Number(item.price);
+              const min = minPrice !== "" ? Number(minPrice) : -Infinity;
+              const max = maxPrice !== "" ? Number(maxPrice) : Infinity;
+
+              const matchesPrice = price >= min && price <= max;
+
+              return matchesSearch && matchesPrice;
+            })
+            .map((item) => (
+              <Card
+                key={item.id}
+                sx={{
+                  width: { xs: "100%", sm: 250, md: 300 },
+                  flexShrink: 0,
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: 6,
+                  },
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="180"
+                  image={item.picture}
+                  alt={item.name}
+                  onClick={() => showModal(item)}
+                  sx={{ cursor: "pointer", objectFit: "cover" }}
+                />
+                <CardContent
+                  onClick={() => showModal(item)}
+                  sx={{ cursor: "pointer" }}
+                >
+                  <Typography variant="h6" align="center">
+                    {item.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      height: "100px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      mt: 1,
+                    }}
+                  >
+                    {item.description}
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    color="text.primary"
+                    sx={{ mt: 1 }}
+                  >
+                    Price: {item.price}
+                  </Typography>
+                </CardContent>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  sx={{ color: "blue", mt: 1 }}
+                >
+                  Buy
+                </Button>
+              </Card>
+            ))}
+        </Box>
+      </Box>
+
+      {/* Modal hiển thị chi tiết */}
       <Modal open={isModalOpen} onClose={handleCancel}>
         <Box
           sx={{
@@ -111,76 +258,6 @@ function CardItem() {
           )}
         </Box>
       </Modal>
-
-      <Box
-        sx={{
-          mt: 5,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 3,
-          px: 2,
-          overflowX: "hidden", // ẩn thanh cuộn ngang
-          width: "100%", // giới hạn trong viewport
-        }}
-      >
-        {data.map((item) => (
-          <Card
-            key={item.id}
-            sx={{
-              width: { xs: "100%", sm: 250, md: 300 },
-              flexShrink: 0,
-              transition: "transform 0.3s ease, box-shadow 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-8px)",
-                boxShadow: 6,
-              },
-            }}
-          >
-            <CardMedia
-              component="img"
-              height="180"
-              image={item.picture}
-              alt={item.name}
-              onClick={() => showModal(item)}
-              sx={{ cursor: "pointer", objectFit: "cover" }}
-            />
-            <CardContent
-              onClick={() => showModal(item)}
-              sx={{ cursor: "pointer" }}
-            >
-              <Typography variant="h6" align="center">
-                {item.name}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  height: "100px",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                  mt: 1,
-                }}
-              >
-                {item.description}
-              </Typography>
-              <Typography
-                variant="subtitle1"
-                color="text.primary"
-                sx={{ mt: 1 }}
-              >
-                Price: {item.price}
-              </Typography>
-            </CardContent>
-            <Button variant="outlined" fullWidth sx={{ color: "blue", mt: 1 }}>
-              Buy
-            </Button>
-          </Card>
-        ))}
-      </Box>
     </>
   );
 }
