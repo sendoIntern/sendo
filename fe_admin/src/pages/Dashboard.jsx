@@ -50,6 +50,9 @@ function Dashboard() {
     setLoading(true);
     try {
       const res = await axiosInstance.get("/item/getAllItems", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         withCredentials: true,
       });
       if (res.data) setData(res.data);
@@ -95,6 +98,9 @@ function Dashboard() {
     setLoading(true);
     try {
       await axiosInstance.put(`/item/${id}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         withCredentials: true,
       });
     } catch (error) {

@@ -5,3 +5,7 @@ type LoginRequest struct {
 	Email   string `json:"email"`
 	Picture string `json:"picture"`
 }
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken"`
+}
