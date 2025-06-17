@@ -60,9 +60,11 @@ const Nav = () => {
               px: 2,
               py: 1,
               borderRadius: 1,
-              fontWeight: isActive("/") ? "bold" : "normal",
-              color: isActive("/") ? "#1976d2" : "inherit",
-              backgroundColor: isActive("/") ? "#e3f2fd" : "transparent",
+              fontWeight: isActive("/dashboard") ? "bold" : "normal",
+              color: isActive("/dashboard") ? "#1976d2" : "inherit",
+              backgroundColor: isActive("/dashboard")
+                ? "#e3f2fd"
+                : "transparent",
               "&:hover": {
                 backgroundColor: "#e3f2fd",
                 color: "#1976d2",

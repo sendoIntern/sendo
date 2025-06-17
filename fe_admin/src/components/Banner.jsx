@@ -16,9 +16,8 @@ function Banner() {
           },
           withCredentials: true,
         });
-        // api  trả object có key là items
-        setItems(response.data);
-        console.log(response.data);
+        // api trả object có key là items
+        setItems(response.data || []);
       } catch (error) {
         console.error("Error fetching items:", error);
       }

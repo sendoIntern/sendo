@@ -367,7 +367,7 @@ function Dashboard() {
         </Box>
       </Modal>
 
-      <Table dataSource={data} rowKey="id" style={{ marginTop: 20 }}>
+      <Table dataSource={data.data} rowKey="id" style={{ marginTop: 20 }}>
         <Table.Column
           title="Image"
           dataIndex="picture"

@@ -135,80 +135,66 @@ function CardItem() {
             width: "100%",
           }}
         >
-          {data
-            .filter((item) => {
-              const matchesSearch = item.name
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase());
-
-              const price = Number(item.price);
-              const min = minPrice !== "" ? Number(minPrice) : -Infinity;
-              const max = maxPrice !== "" ? Number(maxPrice) : Infinity;
-
-              const matchesPrice = price >= min && price <= max;
-
-              return matchesSearch && matchesPrice;
-            })
-            .map((item) => (
-              <Card
-                key={item.id}
-                sx={{
-                  width: { xs: "100%", sm: 250, md: 300 },
-                  flexShrink: 0,
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: 6,
-                  },
-                }}
+          {data?.data?.map((item) => (
+            <Card
+              key={item.id}
+              sx={{
+                width: { xs: "100%", sm: 250, md: 300 },
+                flexShrink: 0,
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-8px)",
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardMedia
+                component="img"
+                height="180"
+                image={item.picture}
+                alt={item.name}
+                onClick={() => showModal(item)}
+                sx={{ cursor: "pointer", objectFit: "cover" }}
+              />
+              <CardContent
+                onClick={() => showModal(item)}
+                sx={{ cursor: "pointer" }}
               >
-                <CardMedia
-                  component="img"
-                  height="180"
-                  image={item.picture}
-                  alt={item.name}
-                  onClick={() => showModal(item)}
-                  sx={{ cursor: "pointer", objectFit: "cover" }}
-                />
-                <CardContent
-                  onClick={() => showModal(item)}
-                  sx={{ cursor: "pointer" }}
+                <Typography variant="h6" align="center">
+                  {item.name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    height: "100px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    mt: 1,
+                  }}
                 >
-                  <Typography variant="h6" align="center">
-                    {item.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      height: "100px",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: "vertical",
-                      mt: 1,
-                    }}
-                  >
-                    {item.description}
-                  </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    color="text.primary"
-                    sx={{ mt: 1 }}
-                  >
-                    Price: {item.price}
-                  </Typography>
-                </CardContent>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  sx={{ color: "blue", mt: 1 }}
+                  {item.description}
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  color="text.primary"
+                  sx={{ mt: 1 }}
                 >
-                  Buy
-                </Button>
-              </Card>
-            ))}
+                  Price: {item.price}
+                </Typography>
+              </CardContent>
+              <Button
+                variant="outlined"
+                fullWidth
+                sx={{ color: "blue", mt: 1 }}
+              >
+                Buy
+              </Button>
+            </Card>
+          ))}
         </Box>
       </Box>
 
