@@ -20,7 +20,7 @@ import (
 
 func GetAllItemsHandler(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
-	limitStr := c.DefaultQuery("limit", "10")
+	limitStr := c.DefaultQuery("limit", "6")
 
 	page, _ := strconv.Atoi(pageStr)
 	limit, _ := strconv.Atoi(limitStr)
@@ -194,4 +194,10 @@ func GetItemDescHandler(c *gin.Context) {
 		"message": "Get items successfully",
 		"items":   itemDesc,
 	})
+}
+
+
+func SearchItemByNameHandler(c *gin.Context) {}
+
+func FilterItemsByPriceHandler(c *gin.Context) {
 }

@@ -79,11 +79,11 @@ func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error)
 }
 
 func GetAllItems(p *pagination.Paging) ([]entity.Item, error) {
+	p.Offset = (p.Page - 1) * p.Limit
 	items, err := repository.FetchItems(p)
 	if err != nil {
 		return items, err
 	}
-	p.Offset = (p.Page - 1) * p.Limit
 	p.TotalPages = int(math.Ceil(float64(p.Total) / float64(p.Limit)))
 	return items, nil
 }
