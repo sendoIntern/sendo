@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func CreateItem(item entity.Item) error {
@@ -52,24 +53,40 @@ func GetTopViewedItems() ([]entity.Item, error) {
 	return items, nil
 }
 
-func FetchItems(p *pagination.Paging) ([]entity.Item, error) {
+// get items with search, filter and pagination
+func FetchItems(p *pagination.Paging, search string, minPrice float64, maxPrice float64) ([]entity.Item, error) {
 	var items []entity.Item
+	query := db.DB.Model(&entity.Item{})
+
+	if search != "" {
+		query = query.Where("name ILIKE ? OR description ILIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	if minPrice > 0 {
+		query = query.Where("price >= ?", minPrice)
+	}
+
+	if maxPrice > 0 {
+		query = query.Where("price <= ?", maxPrice)
+	}
 
 	// Đếm tổng số dòng
-	if err := db.DB.Model(&entity.Item{}).Count(&p.Total).Error; err != nil {
+	if err := query.Count(&p.Total).Error; err != nil {
 		return nil, err
 	}
 
 	// Truy vấn có paging
-	err := db.DB.
+	result := query.
 		Limit(p.Limit).
 		Offset(p.Offset).
 		Order("created_at DESC").
-		Find(&items).Error
-
-	if err != nil {
-		return nil, err
+		Find(&items)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return items, errors.New("ITEM NOT FOUND")
+		} else {
+			return items, result.Error
+		}
 	}
-
 	return items, nil
 }
