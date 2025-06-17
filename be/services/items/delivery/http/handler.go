@@ -19,18 +19,25 @@ import (
 )
 
 func GetAllItemsHandler(c *gin.Context) {
+	search := c.Query("search") // search string for name or description
+	minPriceStr := c.DefaultQuery("minPrice", "0")
+	maxPriceStr := c.DefaultQuery("maxPrice", "0")
+
+	minPrice, _ := strconv.ParseFloat(minPriceStr, 64) // min price filter
+	maxPrice, _ := strconv.ParseFloat(maxPriceStr, 64) // max price filter
+
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "6")
 
-	page, _ := strconv.Atoi(pageStr)
-	limit, _ := strconv.Atoi(limitStr)
+	page, _ := strconv.Atoi(pageStr)   // page index
+	limit, _ := strconv.Atoi(limitStr) // limit number for a page
 
 	paging := pagination.Paging{
 		Page:  page,
 		Limit: limit,
 	}
 
-	items, err := usecase.GetAllItems(&paging)
+	items, err := usecase.GetAllItems(&paging, search, minPrice, maxPrice)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.APIResponse{
 			Status:  "Fail",
@@ -195,7 +202,6 @@ func GetItemDescHandler(c *gin.Context) {
 		"items":   itemDesc,
 	})
 }
-
 
 func SearchItemByNameHandler(c *gin.Context) {}
 
