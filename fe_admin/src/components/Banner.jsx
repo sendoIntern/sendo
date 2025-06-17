@@ -17,7 +17,7 @@ function Banner() {
           withCredentials: true,
         });
         // api trả object có key là items
-        setItems(response.data || []);
+        setItems(response.data.data || []);
       } catch (error) {
         console.error("Error fetching items:", error);
       }
@@ -38,7 +38,7 @@ function Banner() {
 
   return (
     <Slider {...settings}>
-      {items?.items?.map((item, index) => (
+      {items?.map((item, index) => (
         <div key={index}>
           <img
             src={item.picture}
