@@ -21,8 +21,5 @@ func ItemRoutes(r *gin.Engine) {
 
 		itemGroup.GET("/getItemDesc", middleware.ValidateAccessToken(), GetItemDescHandler) // lấy 3 item có view cao nhất
 
-		itemGroup.POST("/searchItemByName", SearchItemByNameHandler)
-		itemGroup.POST("/filterItemsByPrice", FilterItemsByPriceHandler)
-
 	}
 }
