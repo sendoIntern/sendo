@@ -4,6 +4,7 @@ import (
 	"be/pkg/db"
 	"be/services/auth/model/entity"
 	"be/services/auth/model/request"
+	"be/services/auth/model/responce"
 	"be/services/auth/usecase"
 	"fmt"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	// jwt "be/services/items/utils"
 
 	"github.com/gin-gonic/gin"
+	// "github.com/gohugoio/hugo/resources"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -25,18 +27,25 @@ func LoginHandler(c *gin.Context) {
         return
     }
 	res, accessToken, refreshToken, err := usecase.Login(req)
-	if err != nil {c.JSON(http.StatusInternalServerError, gin.H{
-		"error": err.Error(),
+	if err != nil {c.JSON(http.StatusInternalServerError, responce.APIResponse{
+		Status:  "Fail",
+		Message: "Login failed",
+		Error: err.Error(),
 	})
 	return
 }
 	fmt.Println("Access Token:", accessToken)
 	fmt.Println("Refresh Token:", refreshToken)
-	c.JSON(http.StatusOK, gin.H{
-        "data":  res,
-        "accessToken": accessToken,
-		"refreshToken": refreshToken,
-    })
+	tokenResponse := responce.TokenResponse{
+		Data:         res,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+	c.JSON(http.StatusOK, responce.APIResponse{
+        Status: "Success",
+		Message: "Login successful",
+		Data: tokenResponse,
+	})
 }
 
 // func RefreshTokenHandler(c *gin.Context) {
@@ -133,13 +142,20 @@ func RefreshTokenHandler(c *gin.Context) {
 
 	newRefreshToken, err := usecase.SignRefreshToken(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sign refresh token"})
+		c.JSON(http.StatusInternalServerError, responce.APIResponse{
+			Status:  "Fail",
+			Message: "Failed to sign refresh token",
+			Error:   err.Error(),
+		})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"accessToken":  newAccessToken,
-		"refreshToken": newRefreshToken,
+	dataToken := responce.TokenResponse{
+		AccessToken:  newAccessToken,
+		RefreshToken: newRefreshToken,
+	}
+	c.JSON(http.StatusOK, responce.APIResponse{
+		Status:  "Success",
+		Data: dataToken,
 	})
 }
 
