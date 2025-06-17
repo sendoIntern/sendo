@@ -59,17 +59,29 @@ func GetItemByIdHandler(c *gin.Context) {
 	id := c.Param("itemId")
 	result := db.DB.First(&item, "id = ?", id)
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		c.JSON(http.StatusBadRequest, response.APIResponse{
+			Status:  "Fail",
+			Message: "Cannot get item",
+			Error:   result.Error.Error(),
+		})
 		return
 	}
 	db.DB.Model(&item).Update("view", item.View+1)
-	c.JSON(http.StatusOK, item)
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Item retrieved successfully",
+		Data:    item,
+	})
 }
 
 func CreateItemHandler(c *gin.Context) {
 	file, fileHeader, err := c.Request.FormFile("picture")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Image is required"})
+		c.JSON(http.StatusBadRequest, response.APIResponse{
+			Status:  "Fail",
+			Message: "Image is required",
+			Error:   err.Error(),
+		})
 		return
 	}
 	defer file.Close()
@@ -85,7 +97,11 @@ func CreateItemHandler(c *gin.Context) {
 
 	item, err := usecase.CreateItem(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Item Creation Error": err.Error()})
+		c.JSON(http.StatusInternalServerError, response.APIResponse{
+			Status:  "Fail",
+			Message: "Item Creation Error",
+			Error:   err.Error(),
+		})
 		return
 	}
 
@@ -99,7 +115,11 @@ func CreateItemHandler(c *gin.Context) {
 		CreatedAt:   item.CreatedAt,
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Item created", "item": resp})
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Item created successfully",
+		Data:    resp,
+	})
 }
 
 func DeleteItemHandler(c *gin.Context) {
@@ -107,12 +127,17 @@ func DeleteItemHandler(c *gin.Context) {
 
 	err := usecase.DeleteItem(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Item Deletion Error": err.Error()})
+		c.JSON(http.StatusInternalServerError, response.APIResponse{
+			Status:  "Fail",
+			Message: "Item Deletion Error",
+			Error:   err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Item deleted successfully",
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Item deleted successfully",
 	})
 }
 
@@ -138,7 +163,11 @@ func UpdateItemByIdHandler(c *gin.Context) {
 	var item entity.Item
 	item, err = usecase.UpdateItem(id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Item Update Error": err.Error()})
+		c.JSON(http.StatusInternalServerError, response.APIResponse{
+			Status:  "Fail",
+			Message: "Item Update Error",
+			Error:   err.Error(),
+		})
 		return
 	}
 
@@ -151,13 +180,21 @@ func UpdateItemByIdHandler(c *gin.Context) {
 		UpdatedAt:   item.UpdatedAt,
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully", "item": resp})
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Item updated successfully",
+		Data:    resp,
+	})
 }
 
 func UploadExcelHandler(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
+		c.JSON(http.StatusBadRequest, response.APIResponse{
+			Status:  "Fail",
+			Message: "File is required",
+			Error:   err.Error(),
+		})
 		return
 	}
 	var errs []error
@@ -175,35 +212,46 @@ func UploadExcelHandler(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "imported to queue",
-		"errors":  errs,
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Items imported to queue successfully",
+		Data: map[string]interface{}{
+			"errors": errs,
+		},
 	})
 }
 
 func GetImportErrorsHandler(c *gin.Context) {
 	importErrs, err := usecase.GetErrorItems()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get error items: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, response.APIResponse{
+			Status:  "Fail",
+			Message: "Cannot get error items",
+			Error:   err.Error(),
+		})
 		return
 	}
-	c.JSON(http.StatusOK, importErrs)
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Import errors retrieved successfully",
+		Data:    importErrs,
+	})
 }
 
 func GetItemDescHandler(c *gin.Context) {
 	itemDesc, err := usecase.GetItemDesc()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get item description: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, response.APIResponse{
+			Status:  "Fail",
+			Message: "Cannot get items desc",
+			Error:   err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Get items successfully",
-		"items":   itemDesc,
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Items desc retrieved successfully",
+		Data:    itemDesc,
 	})
-}
-
-func SearchItemByNameHandler(c *gin.Context) {}
-
-func FilterItemsByPriceHandler(c *gin.Context) {
 }
