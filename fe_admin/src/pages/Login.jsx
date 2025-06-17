@@ -41,7 +41,7 @@ const Login = () => {
           picture: res.data.picture,
         });
 
-        localStorage.setItem("accessToken", responce.data.accessToken);
+        localStorage.setItem("accessToken", responce.data.data.access_token);
         navigate("/product");
       } catch (err) {
         console.error("Lỗi đăng nhập", err);

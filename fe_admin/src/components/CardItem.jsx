@@ -40,7 +40,7 @@ function CardItem() {
   const fetchProducts = async () => {
     try {
       const res = await axiosInstance.get(
-        `/item/getAllItems?page=${currentPage}&limit=${5}`,
+        `/item/getAllItems?page=${currentPage}&limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -56,15 +56,18 @@ function CardItem() {
   };
   const handleSearchEnter = async () => {
     try {
-      const res = await axiosInstance.post(``, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        params: {
-          search: searchTerm,
-        },
-        withCredentials: true,
-      });
+      const res = await axiosInstance.get(
+        `/item/getAllItems?search=${searchTerm}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          params: {
+            search: searchTerm,
+          },
+          withCredentials: true,
+        }
+      );
       setData(res.data);
       setTotalPages(res.data.pagination.total_pages);
     } catch (error) {
@@ -80,16 +83,19 @@ function CardItem() {
 
   const handleSubmitFilter = async () => {
     try {
-      const res = await axiosInstance.post(``, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        params: {
-          minPrice: minPrice || -infinity,
-          maxPrice: maxPrice || infinity,
-        },
-        withCredentials: true,
-      });
+      const res = await axiosInstance.get(
+        `/item/getAllItems?minPrice=${minPrice}&maxPrice=${maxPrice}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          params: {
+            minPrice: minPrice || 0,
+            maxPrice: maxPrice || 0,
+          },
+          withCredentials: true,
+        }
+      );
       setData(res.data);
       setTotalPages(res.data.pagination.total_pages);
     } catch (error) {
