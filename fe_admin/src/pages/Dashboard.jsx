@@ -136,10 +136,16 @@ function Dashboard() {
       console.log("Uploading file:", file.name);
 
       await axiosInstance.post("/item/import", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         withCredentials: true,
       });
 
       const isErr = await axiosInstance.get("/item/getErrorItems", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         withCredentials: true,
       });
 
