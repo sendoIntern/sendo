@@ -78,9 +78,9 @@ func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error)
 	return item, nil
 }
 
-func GetAllItems(p *pagination.Paging) ([]entity.Item, error) {
+func GetAllItems(p *pagination.Paging, search string, minPrice float64, maxPrice float64) ([]entity.Item, error) {
 	p.Offset = (p.Page - 1) * p.Limit
-	items, err := repository.FetchItems(p)
+	items, err := repository.FetchItems(p, search, minPrice, maxPrice)
 	if err != nil {
 		return items, err
 	}
