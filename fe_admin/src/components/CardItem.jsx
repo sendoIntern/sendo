@@ -11,6 +11,7 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Pagination,
 } from "@mui/material";
 
 import { axiosInstance } from "../lib/axios";
@@ -22,28 +23,83 @@ function CardItem() {
   const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+
+  // dữ liệu gửi cho be
   const [searchTerm, setSearchTerm] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [totalPages, setTotalPages] = useState(10);
+  const [totalPages, setTotalPages] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 6;
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axiosInstance.get("/item/getAllItems", {
+    fetchProducts();
+    console.log(currentPage);
+  }, [currentPage]);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await axiosInstance.get(
+        `/item/getAllItems?page=${currentPage}&limit=${5}`,
+        {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           withCredentials: true,
-        });
-        setData(res.data);
-        setTotalPages(res.data.totalPages);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-    fetchProducts();
-  }, []);
+        }
+      );
+      setData(res.data);
+      setTotalPages(res.data.pagination.total_pages);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+  const handleSearchEnter = async () => {
+    try {
+      const res = await axiosInstance.post(``, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        params: {
+          search: searchTerm,
+        },
+        withCredentials: true,
+      });
+      setData(res.data);
+      setTotalPages(res.data.pagination.total_pages);
+    } catch (error) {
+      console.error("Error searching products:", error);
+    }
+  };
+
+  const handleEnterKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearchEnter();
+    }
+  };
+
+  const handleSubmitFilter = async () => {
+    try {
+      const res = await axiosInstance.post(``, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        params: {
+          minPrice: minPrice || -infinity,
+          maxPrice: maxPrice || infinity,
+        },
+        withCredentials: true,
+      });
+      setData(res.data);
+      setTotalPages(res.data.pagination.total_pages);
+    } catch (error) {
+      console.error("Error filtering products:", error);
+    }
+  };
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value); // Gọi lại hàm để lấy dữ liệu cho trang mới
+  };
 
   const fetchDataByid = async (id) => {
     try {
@@ -63,11 +119,6 @@ function CardItem() {
     setSelectedItem(item);
     fetchDataByid(item.id);
     setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-    setSelectedItem(null);
   };
 
   const handleCancel = () => {
@@ -102,28 +153,42 @@ function CardItem() {
             variant="outlined"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleEnterKeyDown}
             fullWidth
           />
-          <Typography variant="subtitle1">Filter by Price</Typography>
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              label="Min Price"
-              type="number"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Max Price"
-              type="number"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              fullWidth
-            />
+          <Box>
+            <Typography variant="subtitle1">Filter by Price</Typography> <br />
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label="Min Price"
+                type="number"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="Max Price"
+                type="number"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                fullWidth
+              />
+            </Box>
+            <br />
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <Button onClick={handleSubmitFilter} variant="contained">
+                Submit
+              </Button>
+            </Box>
           </Box>
         </Box>
-
+        {/* ////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////// */}
         {/* Cột phải: Danh sách sản phẩm */}
+
         <Box
           sx={{
             flex: 1,
@@ -135,83 +200,87 @@ function CardItem() {
             width: "100%",
           }}
         >
-          {data
-            .filter((item) => {
-              const matchesSearch = item.name
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase());
-
-              const price = Number(item.price);
-              const min = minPrice !== "" ? Number(minPrice) : -Infinity;
-              const max = maxPrice !== "" ? Number(maxPrice) : Infinity;
-
-              const matchesPrice = price >= min && price <= max;
-
-              return matchesSearch && matchesPrice;
-            })
-            .map((item) => (
-              <Card
-                key={item.id}
-                sx={{
-                  width: { xs: "100%", sm: 250, md: 300 },
-                  flexShrink: 0,
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: 6,
-                  },
-                }}
+          {data?.data?.map((item) => (
+            <Card
+              key={item.id}
+              sx={{
+                width: { xs: "100%", sm: 250, md: 300 },
+                flexShrink: 0,
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-8px)",
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardMedia
+                component="img"
+                height="180"
+                image={item.picture}
+                alt={item.name}
+                onClick={() => showModal(item)}
+                sx={{ cursor: "pointer", objectFit: "cover" }}
+              />
+              <CardContent
+                onClick={() => showModal(item)}
+                sx={{ cursor: "pointer" }}
               >
-                <CardMedia
-                  component="img"
-                  height="180"
-                  image={item.picture}
-                  alt={item.name}
-                  onClick={() => showModal(item)}
-                  sx={{ cursor: "pointer", objectFit: "cover" }}
-                />
-                <CardContent
-                  onClick={() => showModal(item)}
-                  sx={{ cursor: "pointer" }}
+                <Typography variant="h6" align="center">
+                  {item.name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    height: "100px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    mt: 1,
+                  }}
                 >
-                  <Typography variant="h6" align="center">
-                    {item.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      height: "100px",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: "vertical",
-                      mt: 1,
-                    }}
-                  >
-                    {item.description}
-                  </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    color="text.primary"
-                    sx={{ mt: 1 }}
-                  >
-                    Price: {item.price}
-                  </Typography>
-                </CardContent>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  sx={{ color: "blue", mt: 1 }}
+                  {item.description}
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  color="text.primary"
+                  sx={{ mt: 1 }}
                 >
-                  Buy
-                </Button>
-              </Card>
-            ))}
+                  Price: {item.price}
+                </Typography>
+              </CardContent>
+              <Button
+                variant="outlined"
+                fullWidth
+                sx={{ color: "blue", mt: 1 }}
+              >
+                Buy
+              </Button>
+            </Card>
+          ))}
         </Box>
       </Box>
-
+      <br />
+      <Box
+        sx={{ display: "flex", justifyContent: "center", my: 2 }} // my: margin dọc để tạo khoảng cách
+      >
+        <Pagination
+          count={totalPages} // Tổng số trang
+          page={currentPage} // Trang hiện tại
+          onChange={handlePageChange} // Xử lý sự kiện chuyển trang
+          color="primary" // Màu chủ đạo
+          variant="outlined" // Kiểu nút: outlined hoặc text
+          shape="rounded" // Hình dạng nút: rounded hoặc circular
+        />
+      </Box>
+      {/* ////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////// */}
       {/* Modal hiển thị chi tiết */}
       <Modal open={isModalOpen} onClose={handleCancel}>
         <Box

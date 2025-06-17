@@ -9,7 +9,7 @@ import (
 func ItemRoutes(r *gin.Engine) {
 	itemGroup := r.Group("/item")
 	{
-		itemGroup.GET("/getAllItems", middleware.ValidateAccessToken(), GetAllItemsHandler)
+		itemGroup.GET("/getAllItems", GetAllItemsHandler)
 		itemGroup.GET("/getItemById/:itemId", middleware.ValidateAccessToken(), middleware.ItemIDMiddleware(), GetItemByIdHandler)
 
 		itemGroup.POST("/createNewItem", middleware.ValidateItemFields(), CreateItemHandler)
@@ -20,5 +20,9 @@ func ItemRoutes(r *gin.Engine) {
 		itemGroup.GET("/getErrorItems", middleware.ValidateAccessToken(), GetImportErrorsHandler)
 
 		itemGroup.GET("/getItemDesc", middleware.ValidateAccessToken(), GetItemDescHandler) // lấy 3 item có view cao nhất
+
+		itemGroup.POST("/searchItemByName", SearchItemByNameHandler)
+		itemGroup.POST("/filterItemsByPrice", FilterItemsByPriceHandler)
+
 	}
 }
