@@ -144,6 +144,8 @@ func CreateItemHandler(c *gin.Context) {
 		CreatedAt:   item.CreatedAt,
 	}
 
+	cache.ClearCacheByKey("items:*") // invalidate cache
+
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
 		Message: "Item created successfully",
@@ -163,6 +165,8 @@ func DeleteItemHandler(c *gin.Context) {
 		})
 		return
 	}
+
+	cache.ClearCacheByKey("items:*") // invalidate cache
 
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
@@ -209,6 +213,8 @@ func UpdateItemByIdHandler(c *gin.Context) {
 		UpdatedAt:   item.UpdatedAt,
 	}
 
+	cache.ClearCacheByKey("items:*") // invalidate cache
+
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
 		Message: "Item updated successfully",
@@ -240,6 +246,8 @@ func UploadExcelHandler(c *gin.Context) {
 			}
 		}
 	}
+
+	cache.ClearCacheByKey("items:*") // invalidate cache
 
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
