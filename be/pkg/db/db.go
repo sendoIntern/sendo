@@ -1,58 +1,50 @@
 package db
 
 import (
+	"be/pkg/config"
 	"be/services/auth/model/entity"
 	itemsEntity "be/services/items/model/entity"
 	"fmt"
 	"log"
-	"os"
+	"sync"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-// check global variable - use singleton pattern
-var DB *gorm.DB
+var (
+	instance *gorm.DB
+	once     sync.Once
+)
 
-// New một instance mới của DB với giá trị từ .env
-func New() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Could not load .env file")
-	}
+func GetDB() *gorm.DB {
+	once.Do(func() {
+		dsn := fmt.Sprintf(
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			config.GetEnv("DB_HOST", "localhost"),
+			config.GetEnv("DB_PORT", "5432"),
+			config.GetEnv("DB_USER", "postgres"),
+			config.GetEnv("DB_PASSWORD", ""),
+			config.GetEnv("DB_NAME", "postgres"),
+		)
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err != nil {
+			log.Fatalf("failed to connect to DB: %v", err)
+		}
 
-	var err2 error
-	DB, err2 = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err2 != nil {
-		log.Fatal("Failed to connect to database")
-		return
-	}
+		instance = db
+		// Tự động tạo bảng nếu chưa có
+		err = db.AutoMigrate(
+			&entity.User{},
+			&itemsEntity.Item{},
+			&itemsEntity.ImportError{},
+		)
+		if err != nil {
+			log.Fatal("Failed to migrate database:", err)
+			return
+		}
+	})
 
-	// Tự động tạo bảng nếu chưa có
-	err = DB.AutoMigrate(
-		&entity.User{},
-		&itemsEntity.Item{},
-		&itemsEntity.ImportError{},
-	)
-	if err != nil {
-		log.Fatal("Failed to migrate database:", err)
-		return
-	}
-
-	log.Println("Connect database successful!")
-	log.Println("Server on PORT:", "8080")
-}
-
-// đóng kết nối database
-func Close() {
-	sqlDB, err := DB.DB()
-	if err != nil {
-		log.Fatal("Failed to get database instance")
-		return
-	}
-	sqlDB.Close()
+	return instance
 }
