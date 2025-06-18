@@ -22,8 +22,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var redisClient = cache.GetRedis()
-
 func GetAllItemsHandler(c *gin.Context) {
 	search := c.DefaultQuery("search", "") // search string for name or description
 	minPriceStr := c.DefaultQuery("minPrice", "0")
