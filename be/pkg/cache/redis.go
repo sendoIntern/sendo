@@ -3,6 +3,7 @@ package cache
 import (
 	"be/pkg/config"
 	"context"
+	"log"
 	"sync"
 	"time"
 
@@ -36,4 +37,17 @@ func SetCache(key string, value interface{}, ttl time.Duration) error {
 
 func GetCache(key string) (string, error) {
 	return GetRedis().Get(ctx, key).Result()
+}
+
+func ClearCacheByKey(key string) {
+	keys, err := client.Keys(ctx, key).Result()
+	if err != nil {
+		log.Println("Failed to find keys to clear:", err)
+		return
+	}
+	if len(keys) > 0 {
+		if err := client.Del(ctx, keys...).Err(); err != nil {
+			log.Println("Failed to delete keys:", err)
+		}
+	}
 }
