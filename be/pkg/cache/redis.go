@@ -40,13 +40,13 @@ func GetCache(key string) (string, error) {
 }
 
 func ClearCacheByKey(key string) {
-	keys, err := client.Keys(ctx, key).Result()
+	keys, err := GetRedis().Keys(ctx, key).Result()
 	if err != nil {
 		log.Println("Failed to find keys to clear:", err)
 		return
 	}
 	if len(keys) > 0 {
-		if err := client.Del(ctx, keys...).Err(); err != nil {
+		if err := GetRedis().Del(ctx, keys...).Err(); err != nil {
 			log.Println("Failed to delete keys:", err)
 		}
 	}
