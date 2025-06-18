@@ -1,19 +1,18 @@
 package repository
 
 import (
-	"be/pkg/db"
 	"be/services/items/model/entity"
 )
 
 func SaveError(importErr entity.ImportError) error {
-	if err := db.DB.Create(&importErr).Error; err != nil {
+	if err := database.Create(&importErr).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func DeleteError() error {
-	result := db.DB.Exec("DELETE from import_errors")
+	result := database.Exec("DELETE from import_errors")
 	if result.Error != nil {
 		return result.Error
 	}

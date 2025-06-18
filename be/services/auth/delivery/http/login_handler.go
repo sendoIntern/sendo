@@ -16,24 +16,23 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-
-
 func LoginHandler(c *gin.Context) {
 	var req request.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": "Invalid request payload: " + err.Error(),
-        })
-        return
-    }
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid request payload: " + err.Error(),
+		})
+		return
+	}
 	res, accessToken, refreshToken, err := usecase.Login(req)
-	if err != nil {c.JSON(http.StatusInternalServerError, responce.APIResponse{
-		Status:  "Fail",
-		Message: "Login failed",
-		Error: err.Error(),
-	})
-	return
-}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responce.APIResponse{
+			Status:  "Fail",
+			Message: "Login failed",
+			Error:   err.Error(),
+		})
+		return
+	}
 	fmt.Println("Access Token:", accessToken)
 	fmt.Println("Refresh Token:", refreshToken)
 	tokenResponse := responce.TokenResponse{
@@ -42,15 +41,15 @@ func LoginHandler(c *gin.Context) {
 		RefreshToken: refreshToken,
 	}
 	c.JSON(http.StatusOK, responce.APIResponse{
-        Status: "Success",
+		Status:  "Success",
 		Message: "Login successful",
-		Data: tokenResponse,
+		Data:    tokenResponse,
 	})
 }
 
 // func RefreshTokenHandler(c *gin.Context) {
 // 	// lấy từ middleware
-	
+
 // 	var req request.RefreshTokenRequest
 // 	fmt.Println("RefreshTokenHandler called" + req.RefreshToken)
 // 	if err := c.ShouldBindJSON(&req); err != nil || req.RefreshToken == "" {
@@ -72,7 +71,7 @@ func LoginHandler(c *gin.Context) {
 // 	}
 
 // 	var user entity.User
-// 	err = db.DB.Where("email = ?", email).First(&user).Error
+// 	err = database.Where("email = ?", email).First(&user).Error
 // 	if err != nil {
 // 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 // 		return
@@ -99,8 +98,8 @@ func LoginHandler(c *gin.Context) {
 // 	})
 // }
 
-
 func RefreshTokenHandler(c *gin.Context) {
+	database := db.GetDB()
 	// Lấy refreshToken và claims từ context (đã được middleware ValidateRefreshToken xử lý)
 	_, exists := c.Get("refreshToken")
 	if !exists {
@@ -128,7 +127,7 @@ func RefreshTokenHandler(c *gin.Context) {
 
 	// Tìm user trong DB
 	var user entity.User
-	if err := db.DB.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := database.Where("email = ?", email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
 	}
@@ -154,11 +153,7 @@ func RefreshTokenHandler(c *gin.Context) {
 		RefreshToken: newRefreshToken,
 	}
 	c.JSON(http.StatusOK, responce.APIResponse{
-		Status:  "Success",
-		Data: dataToken,
+		Status: "Success",
+		Data:   dataToken,
 	})
 }
-
-
-
-

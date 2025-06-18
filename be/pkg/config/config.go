@@ -10,7 +10,7 @@ import (
 
 var once sync.Once
 
-func LoadEnv() {
+func loadEnv() {
 	once.Do(func() {
 		err := godotenv.Load()
 		if err != nil {
@@ -20,7 +20,7 @@ func LoadEnv() {
 }
 
 func GetEnv(key, fallback string) string {
-	LoadEnv()
+	loadEnv()
 	if value := os.Getenv(key); value != "" {
 		return value
 	}

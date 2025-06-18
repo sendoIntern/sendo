@@ -19,11 +19,12 @@ import (
 // function kiểm tra ID trước khi gọi handlers
 func ItemIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		database := db.GetDB()
 		id := c.Param("itemId")
-		
+
 		// Kiểm tra xem item có tồn tại không
 		var item entity.Item
-		result := db.DB.First(&item, "id = ?", id)
+		result := database.First(&item, "id = ?", id)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
@@ -40,32 +41,31 @@ func ItemIDMiddleware() gin.HandlerFunc {
 // check input của item có hợp lệ không
 func ValidateItemFields() gin.HandlerFunc {
 	return func(c *gin.Context) {
-			name := c.PostForm("name")
-			price := c.PostForm("price")
-			quantity := c.PostForm("quantity")
-			description := c.PostForm("description")
+		name := c.PostForm("name")
+		price := c.PostForm("price")
+		quantity := c.PostForm("quantity")
+		description := c.PostForm("description")
 
-			if name == "" {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Name is required"})
-				return
-			}
-			if price == "" {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Price is required"})
-				return
-			}
-			if quantity == "" {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Quantity is required"})
-				return
-			}
-			if description == "" {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Description is required"})
-				return
-			}
+		if name == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Name is required"})
+			return
+		}
+		if price == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Price is required"})
+			return
+		}
+		if quantity == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Quantity is required"})
+			return
+		}
+		if description == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Description is required"})
+			return
+		}
 
 		c.Next()
 	}
 }
-
 
 func RequireExcelFileMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -81,7 +81,7 @@ func RequireExcelFileMiddleware() gin.HandlerFunc {
 	}
 }
 
-//validate access token
+// validate access token
 func ValidateAccessToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -111,8 +111,6 @@ func ValidateAccessToken() gin.HandlerFunc {
 		c.Next()
 	}
 }
-	
-
 
 // validate refresh token lấy từ body request
 
@@ -134,9 +132,7 @@ func ValidateRefreshToken() gin.HandlerFunc {
 		}
 
 		c.Set("refreshToken", req) // Lưu refresh token vào context nếu cần thiết
-		c.Set("claims", decoded) 
+		c.Set("claims", decoded)
 		c.Next()
 	}
 }
-
-

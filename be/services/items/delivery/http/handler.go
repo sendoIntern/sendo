@@ -55,9 +55,10 @@ func GetAllItemsHandler(c *gin.Context) {
 }
 
 func GetItemByIdHandler(c *gin.Context) {
+	database := db.GetDB()
 	var item entity.Item
 	id := c.Param("itemId")
-	result := db.DB.First(&item, "id = ?", id)
+	result := database.First(&item, "id = ?", id)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, response.APIResponse{
 			Status:  "Fail",
@@ -66,7 +67,7 @@ func GetItemByIdHandler(c *gin.Context) {
 		})
 		return
 	}
-	db.DB.Model(&item).Update("view", item.View+1)
+	database.Model(&item).Update("view", item.View+1)
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
 		Message: "Item retrieved successfully",

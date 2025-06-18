@@ -1,28 +1,18 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
-	"os"
-
-	"be/pkg/db"
 	"be/services/items/model/entity"
 	"be/services/items/repository"
+	"encoding/json"
+	"log"
 
-	"github.com/joho/godotenv"
+	"be/pkg/config"
+
 	"github.com/streadway/amqp"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Could not load .env file", err)
-	}
-
-	db.New()
-	defer db.Close()
-
-	conn, _ := amqp.Dial(os.Getenv("RABBITMQ_URL"))
+	conn, _ := amqp.Dial(config.GetEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"))
 	ch, _ := conn.Channel()
 	q, _ := ch.QueueDeclare(
 		"item_import",

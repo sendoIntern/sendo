@@ -5,7 +5,6 @@ import (
 	"be/services/auth/model/entity"
 	"be/services/auth/model/request"
 	"be/services/auth/model/responce"
-
 	"errors"
 	"os"
 	"time"
@@ -33,7 +32,6 @@ func GenerateToken(user entity.User) (string, error) {
 	return tokenString, nil
 }
 
-
 func SignAccessToken(user entity.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID.String(),
@@ -50,7 +48,7 @@ func SignAccessToken(user entity.User) (string, error) {
 }
 
 func SignRefreshToken(user entity.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{		
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID.String(),
 		"email":   user.Email,
 		"name":    user.Name,
@@ -66,10 +64,11 @@ func SignRefreshToken(user entity.User) (string, error) {
 
 // Login
 func Login(req request.LoginRequest) (responce.LoginResponse, string, string, error) {
+	database := db.GetDB()
 	var user entity.User
 
 	// check xem user đã tồn tại trong database chưa
-	err := db.DB.Where("email = ?", req.Email).First(&user).Error
+	err := database.Where("email = ?", req.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// Tạo user mới nếu không tìm thấy
@@ -79,7 +78,7 @@ func Login(req request.LoginRequest) (responce.LoginResponse, string, string, er
 				Picture: req.Picture,
 				Role:    "user",
 			}
-			if err := db.DB.Create(&user).Error; err != nil {
+			if err := database.Create(&user).Error; err != nil {
 				return responce.LoginResponse{}, "", "", errors.New("failed to create user: " + err.Error())
 			}
 		} else {
@@ -109,4 +108,3 @@ func Login(req request.LoginRequest) (responce.LoginResponse, string, string, er
 
 	return res, accessToken, refreshToken, nil
 }
-

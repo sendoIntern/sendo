@@ -19,6 +19,8 @@ import (
 	"github.com/google/uuid"
 )
 
+var database = db.GetDB()
+
 func CreateItem(req request.ItemCreationRequest) (entity.Item, error) {
 	imageURL, err := cloudinary.UploadToCloudinary(*req.PictureFile, req.PictureHeader)
 	if err != nil {
@@ -90,11 +92,11 @@ func GetAllItems(p *pagination.Paging, search string, minPrice float64, maxPrice
 
 func GetItemById(itemId string) (*entity.Item, error) {
 	var item entity.Item
-	result := db.DB.First(&item, "id = ?", itemId)
+	result := database.First(&item, "id = ?", itemId)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	db.DB.Model(&item).Update("view", item.View+1)
+	database.Model(&item).Update("view", item.View+1)
 	return &item, nil
 }
 
@@ -166,7 +168,7 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
 
 func GetErrorItems() ([]entity.ImportError, error) {
 	var errs []entity.ImportError
-	result := db.DB.Find(&errs)
+	result := database.Find(&errs)
 	if result.Error != nil {
 		return nil, result.Error
 	}

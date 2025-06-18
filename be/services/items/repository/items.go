@@ -10,15 +10,17 @@ import (
 	"gorm.io/gorm"
 )
 
+var database = db.GetDB()
+
 func CreateItem(item entity.Item) error {
-	if err := db.DB.Create(&item).Error; err != nil {
+	if err := database.Create(&item).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func DeleteItem(id uuid.UUID) error {
-	result := db.DB.Delete(&entity.Item{}, id)
+	result := database.Delete(&entity.Item{}, id)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -29,7 +31,7 @@ func DeleteItem(id uuid.UUID) error {
 }
 
 func UpdateItem(item entity.Item) error {
-	if err := db.DB.Save(&item).Error; err != nil {
+	if err := database.Save(&item).Error; err != nil {
 		return err
 	}
 	return nil
@@ -37,7 +39,7 @@ func UpdateItem(item entity.Item) error {
 
 func IsExistItem(id uuid.UUID) (entity.Item, bool) {
 	var item entity.Item
-	result := db.DB.First(&item, "id = ?", id)
+	result := database.First(&item, "id = ?", id)
 	if result.Error != nil {
 		return entity.Item{}, false
 	}
@@ -47,7 +49,7 @@ func IsExistItem(id uuid.UUID) (entity.Item, bool) {
 // lấy 3 item có view cao nhất
 func GetTopViewedItems() ([]entity.Item, error) {
 	var items []entity.Item
-	if err := db.DB.Order("view DESC").Limit(3).Find(&items).Error; err != nil {
+	if err := database.Order("view DESC").Limit(3).Find(&items).Error; err != nil {
 		return nil, err
 	}
 	return items, nil
@@ -56,7 +58,7 @@ func GetTopViewedItems() ([]entity.Item, error) {
 // get items with search, filter and pagination
 func FetchItems(p *pagination.Paging, search string, minPrice float64, maxPrice float64) ([]entity.Item, error) {
 	var items []entity.Item
-	query := db.DB.Model(&entity.Item{})
+	query := database.Model(&entity.Item{})
 
 	if search != "" {
 		query = query.Where("name ILIKE ? OR description ILIKE ?", "%"+search+"%", "%"+search+"%")

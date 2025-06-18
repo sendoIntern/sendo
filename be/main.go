@@ -1,15 +1,12 @@
 package main
 
 import (
-	"be/pkg/db"
 	authUserHttp "be/services/auth/delivery/http"
 	itemHttp "be/services/items/delivery/http"
-	"log"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -26,13 +23,6 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-	db.New()
-	defer db.Close()
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	// //login GG
 	// auth := route.Group("/auth")
