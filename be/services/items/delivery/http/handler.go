@@ -6,9 +6,13 @@ import (
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
 	"be/services/items/model/response"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"time"
 
+	"be/pkg/cache"
 	"be/pkg/rabbitmq"
 
 	"be/services/items/usecase"
@@ -18,8 +22,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var redisClient = cache.GetRedis()
+
 func GetAllItemsHandler(c *gin.Context) {
-	search := c.Query("search") // search string for name or description
+	search := c.DefaultQuery("search", "") // search string for name or description
 	minPriceStr := c.DefaultQuery("minPrice", "0")
 	maxPriceStr := c.DefaultQuery("maxPrice", "0")
 
@@ -37,6 +43,21 @@ func GetAllItemsHandler(c *gin.Context) {
 		Limit: limit,
 	}
 
+	// ------------------- REDIS CACHE -------------------
+	cacheKey := fmt.Sprintf("items:search=%s:minPrice=%s:maxPrice=%s:page=%s:limit=%s",
+		search, minPriceStr, maxPriceStr, pageStr, limitStr)
+
+	// Check cache
+	cached, err := cache.GetCache(cacheKey)
+	if err == nil && cached != "" {
+		var cachedResp response.APIResponse
+		if err := json.Unmarshal([]byte(cached), &cachedResp); err == nil {
+			c.JSON(http.StatusOK, cachedResp)
+			return
+		}
+	}
+	// ---------------------------------------------------
+
 	items, err := usecase.GetAllItems(&paging, search, minPrice, maxPrice)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.APIResponse{
@@ -46,11 +67,18 @@ func GetAllItemsHandler(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, response.APIResponse{
+
+	resp := response.APIResponse{
 		Status:     "Success",
 		Pagination: paging,
 		Data:       items,
-	})
+	}
+
+	// Save to Redis
+	data, _ := json.Marshal(resp)
+	cache.SetCache(cacheKey, data, 10*time.Minute)
+
+	c.JSON(http.StatusOK, resp)
 
 }
 

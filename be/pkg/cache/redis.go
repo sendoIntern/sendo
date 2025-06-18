@@ -30,7 +30,7 @@ func GetRedis() *redis.Client {
 	return client
 }
 
-func SetCache(key string, value string, ttl time.Duration) error {
+func SetCache(key string, value interface{}, ttl time.Duration) error {
 	return GetRedis().Set(ctx, key, value, ttl).Err()
 }
 
