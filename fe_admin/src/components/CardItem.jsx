@@ -115,7 +115,7 @@ function CardItem() {
         },
         withCredentials: true,
       });
-      setSelectedItem(res.data);
+      setSelectedItem(res.data.data);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -275,8 +275,8 @@ function CardItem() {
         <Pagination
           count={totalPages} // Tổng số trang
           page={currentPage} // Trang hiện tại
-          onChange={handlePageChange} // Xử lý sự kiện chuyển trang
-          color="primary" // Màu chủ đạo
+          onChange={handlePageChange}
+          color="primary" // Màu nút
           variant="outlined" // Kiểu nút: outlined hoặc text
           shape="rounded" // Hình dạng nút: rounded hoặc circular
         />
