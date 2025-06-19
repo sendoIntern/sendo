@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { axiosInstance } from "../lib/axios";
 import Banner from "../components/Banner";
 import CardItem from "../components/CardItem";
 import Nav from "../components/Nav";

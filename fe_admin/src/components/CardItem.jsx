@@ -1,130 +1,80 @@
 import React, { useEffect, useState } from "react";
 import {
-  Box,
+  Row,
+  Col,
   Card,
-  CardContent,
-  CardMedia,
-  Typography,
+  Input,
+  InputNumber,
   Button,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
   Pagination,
-} from "@mui/material";
-
+  Modal,
+  Typography,
+} from "antd";
 import { axiosInstance } from "../lib/axios";
 
-import { Modal, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+const { Title, Paragraph } = Typography;
 
 function CardItem() {
   const [data, setData] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // dữ liệu gửi cho be
   const [searchTerm, setSearchTerm] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [totalPages, setTotalPages] = useState(5);
+  const [minPrice, setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const limit = 6;
 
   useEffect(() => {
-    fetchProducts();
-    console.log(currentPage);
+    fetchProducts(currentPage);
   }, [currentPage]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page = 1) => {
     try {
-      const res = await axiosInstance.get(
-        `/item/getAllItems?page=${currentPage}&limit=${limit}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          withCredentials: true,
-        }
-      );
-      setData(res.data);
-      setTotalPages(res.data.pagination.total_pages);
+      const res = await axiosInstance.get("/item/getAllItems", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        withCredentials: true,
+        params: {
+          page,
+          limit,
+          search: searchTerm || undefined,
+          minPrice: minPrice !== null ? minPrice : undefined,
+          maxPrice: maxPrice !== null ? maxPrice : undefined,
+        },
+      });
+      setData(res.data.data || []);
+      setTotalPages(res.data.pagination?.total_pages || 1);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
   };
-  const handleSearchEnter = async () => {
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchProducts(1);
+  };
+
+  const handleFilter = () => {
+    setCurrentPage(1);
+    fetchProducts(1);
+  };
+
+  const showModal = async (item) => {
     try {
-      const res = await axiosInstance.get(
-        `/item/getAllItems?search=${searchTerm}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          params: {
-            search: searchTerm,
-          },
-          withCredentials: true,
-        }
-      );
-      setData(res.data);
-      setTotalPages(res.data.pagination.total_pages);
-    } catch (error) {
-      console.error("Error searching products:", error);
-    }
-  };
-
-  const handleEnterKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSearchEnter();
-    }
-  };
-
-  const handleSubmitFilter = async () => {
-    try {
-      const res = await axiosInstance.get(
-        `/item/getAllItems?minPrice=${minPrice}&maxPrice=${maxPrice}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          params: {
-            minPrice: minPrice || 0,
-            maxPrice: maxPrice || 0,
-          },
-          withCredentials: true,
-        }
-      );
-      setData(res.data);
-      setTotalPages(res.data.pagination.total_pages);
-    } catch (error) {
-      console.error("Error filtering products:", error);
-    }
-  };
-
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value); // Gọi lại hàm để lấy dữ liệu cho trang mới
-  };
-
-  const fetchDataByid = async (id) => {
-    try {
-      const res = await axiosInstance.get(`/item/getItemById/${id}`, {
+      const res = await axiosInstance.get(`/item/getItemById/${item.id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         withCredentials: true,
       });
       setSelectedItem(res.data.data);
+      setIsModalOpen(true);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching item details:", error);
     }
-  };
-
-  const showModal = (item) => {
-    setSelectedItem(item);
-    fetchDataByid(item.id);
-    setIsModalOpen(true);
   };
 
   const handleCancel = () => {
@@ -133,207 +83,117 @@ function CardItem() {
   };
 
   return (
-    <>
-      {/* Layout chia 2 cột */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          px: 2,
-          mt: 4,
-        }}
-      >
-        {/* Cột trái: Filter + Search */}
-        <Box
-          sx={{
-            minWidth: 250,
-            maxWidth: 300,
-            mr: 3,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <TextField
-            label="Search by name"
-            variant="outlined"
+    <div style={{ padding: "24px" }}>
+      <Row gutter={[24, 24]}>
+        {/* Left Filter */}
+        <Col xs={24} md={6}>
+          <Input
+            placeholder="Search by name"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleEnterKeyDown}
-            fullWidth
+            onPressEnter={handleSearch}
+            style={{ marginBottom: 16 }}
           />
-          <Box>
-            <Typography variant="subtitle1">Filter by Price</Typography> <br />
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                label="Min Price"
-                type="number"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                fullWidth
-              />
-              <TextField
-                label="Max Price"
-                type="number"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                fullWidth
-              />
-            </Box>
-            <br />
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <Button onClick={handleSubmitFilter} variant="contained">
-                Submit
-              </Button>
-            </Box>
-          </Box>
-        </Box>
-        {/* ////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////// */}
-        {/* Cột phải: Danh sách sản phẩm */}
+          <Title level={5}>Filter by Price</Title>
+          <InputNumber
+            placeholder="Min Price"
+            value={minPrice}
+            onChange={(value) => setMinPrice(value)}
+            style={{ width: "100%", marginBottom: 12 }}
+          />
+          <InputNumber
+            placeholder="Max Price"
+            value={maxPrice}
+            onChange={(value) => setMaxPrice(value)}
+            style={{ width: "100%", marginBottom: 16 }}
+          />
+          <Button type="primary" block onClick={handleFilter}>
+            Apply Filter
+          </Button>
+        </Col>
 
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 3,
-            overflowX: "hidden",
-            width: "100%",
-          }}
-        >
-          {data?.data?.map((item) => (
-            <Card
-              key={item.id}
-              sx={{
-                width: { xs: "100%", sm: 250, md: 300 },
-                flexShrink: 0,
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                "&:hover": {
-                  transform: "translateY(-8px)",
-                  boxShadow: 6,
-                },
+        {/* Product List */}
+        <Col xs={24} md={18}>
+          <Row gutter={[16, 16]}>
+            {data?.map((item) => (
+              <Col xs={24} sm={12} md={8} key={item.id}>
+                <Card
+                  hoverable
+                  cover={
+                    <img
+                      alt={item.name}
+                      src={item.picture}
+                      style={{
+                        height: 180,
+                        objectFit: "cover",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => showModal(item)}
+                    />
+                  }
+                >
+                  <Card.Meta
+                    title={item.name}
+                    description={
+                      <Paragraph
+                        ellipsis={{ rows: 3 }}
+                        onClick={() => showModal(item)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {item.description}
+                      </Paragraph>
+                    }
+                  />
+                  <Title level={5} style={{ marginTop: 12 }}>
+                    Price: {item.price}
+                  </Title>
+                  <Button type="link" block>
+                    Buy
+                  </Button>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <div style={{ textAlign: "center", marginTop: 24 }}>
+            <Pagination
+              current={currentPage}
+              total={totalPages * limit}
+              pageSize={limit}
+              onChange={(page) => {
+                setCurrentPage(page);
+                window.scrollTo({ top: 0, behavior: "smooth" });
               }}
-            >
-              <CardMedia
-                component="img"
-                height="180"
-                image={item.picture}
-                alt={item.name}
-                onClick={() => showModal(item)}
-                sx={{ cursor: "pointer", objectFit: "cover" }}
-              />
-              <CardContent
-                onClick={() => showModal(item)}
-                sx={{ cursor: "pointer" }}
-              >
-                <Typography variant="h6" align="center">
-                  {item.name}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    height: "100px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    mt: 1,
-                  }}
-                >
-                  {item.description}
-                </Typography>
-                <Typography
-                  variant="subtitle1"
-                  color="text.primary"
-                  sx={{ mt: 1 }}
-                >
-                  Price: {item.price}
-                </Typography>
-              </CardContent>
-              <Button
-                variant="outlined"
-                fullWidth
-                sx={{ color: "blue", mt: 1 }}
-              >
-                Buy
-              </Button>
-            </Card>
-          ))}
-        </Box>
-      </Box>
-      <br />
-      <Box
-        sx={{ display: "flex", justifyContent: "center", my: 2 }} // my: margin dọc để tạo khoảng cách
+              showSizeChanger={false}
+            />
+          </div>
+        </Col>
+      </Row>
+
+      {/* Modal */}
+      <Modal
+        open={isModalOpen}
+        title={selectedItem?.name}
+        onCancel={handleCancel}
+        footer={null}
       >
-        <Pagination
-          count={totalPages} // Tổng số trang
-          page={currentPage} // Trang hiện tại
-          onChange={handlePageChange}
-          color="primary" // Màu nút
-          variant="outlined" // Kiểu nút: outlined hoặc text
-          shape="rounded" // Hình dạng nút: rounded hoặc circular
-        />
-      </Box>
-      {/* ////////////////////////////////////////////////////////////////////
-      ////////////////////////////////////////////////////////////////////
-      ////////////////////////////////////////////////////////////////////
-      ////////////////////////////////////////////////////////////////////
-      ////////////////////////////////////////////////////////////////////
-      //////////////////////////////////////////////////////////////////// */}
-      {/* Modal hiển thị chi tiết */}
-      <Modal open={isModalOpen} onClose={handleCancel}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            borderRadius: 2,
-            p: 3,
-            maxHeight: "90vh",
-            overflowY: "auto",
-          }}
-        >
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <IconButton onClick={handleCancel}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          {selectedItem && (
-            <>
-              <Typography variant="h6" gutterBottom>
-                {selectedItem.name}
-              </Typography>
-              <img
-                src={selectedItem.picture}
-                alt={selectedItem.name}
-                style={{
-                  width: "100%",
-                  borderRadius: "8px",
-                  objectFit: "cover",
-                }}
-              />
-              <Typography variant="body1" sx={{ mt: 2 }}>
-                {selectedItem.description}
-              </Typography>
-              <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                Price: {selectedItem.price}
-              </Typography>
-            </>
-          )}
-        </Box>
+        {selectedItem && (
+          <>
+            <img
+              src={selectedItem.picture}
+              alt={selectedItem.name}
+              style={{
+                width: "100%",
+                borderRadius: 8,
+                objectFit: "cover",
+                marginBottom: 16,
+              }}
+            />
+            <Paragraph>{selectedItem.description}</Paragraph>
+            <Title level={5}>Price: {selectedItem.price}</Title>
+          </>
+        )}
       </Modal>
-    </>
+    </div>
   );
 }
 

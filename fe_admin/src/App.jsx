@@ -10,8 +10,11 @@ function App() {
     <Routes>
       <Route path="/" element={<Login />} />
       {/* Routes dành cho user */}
-      <Route element={<RoleRoute allowRoles={["user"]} />}>
+      <Route element={<RoleRoute allowRoles={["user", "admin"]} />}>
         <Route path="/product" element={<Product />} />
+      </Route>
+
+      <Route element={<RoleRoute allowRoles={"admin"} />}>
         <Route path="/dashboard" element={<Dashboard />} />
       </Route>
 

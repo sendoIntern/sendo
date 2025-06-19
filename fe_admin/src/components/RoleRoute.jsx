@@ -3,7 +3,7 @@ import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { auth } from "../lib/auth";
 
-const RoleRoute = ({ allowRoles = [] }) => {
+const RoleRoute = ({ allowRoles }) => {
   const role = auth.getRole();
   console.log(role);
 
