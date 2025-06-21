@@ -40,7 +40,12 @@ const Nav = () => {
 
   const dropdownMenu = (
     <Menu>
-      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+      <Menu.Item
+        key="logout"
+        icon={<LogoutOutlined />}
+        onClick={handleLogout}
+        style={{ fontWeight: "bold" }}
+      >
         Logout
       </Menu.Item>
     </Menu>
@@ -68,7 +73,7 @@ const Nav = () => {
           const item = menuItems.find((i) => i.key === key);
           if (item) navigate(item.path);
         }}
-        style={{ flex: 1 }}
+        style={{ flex: 1, fontWeight: "bold" }}
       >
         {menuItems.map((item) => (
           <Menu.Item key={item.key} icon={item.icon}>

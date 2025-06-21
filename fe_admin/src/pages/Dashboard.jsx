@@ -10,15 +10,19 @@ import {
   Pagination,
   Typography,
   Space,
-  message,
+  Alert,
 } from "antd";
-import { UploadOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  UploadOutlined,
+  PlusOutlined,
+  FileExcelOutlined,
+} from "@ant-design/icons";
 import Nav from "../components/Nav";
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [fileImport, setFileImport] = useState(null);
+  const [_, setFileImport] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -29,11 +33,32 @@ const Dashboard = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [form] = Form.useForm();
+  const [formCreate] = Form.useForm();
+  const [formUpdate] = Form.useForm();
+
+  const [alert, setAlert] = useState(null); // { type: "success" | "error", message: string }
+
+  // Hàm showAlert tiện lợi, tự ẩn sau duration ms
+  const showAlert = (type, messageText, duration = 3000) => {
+    setAlert({ type, message: messageText });
+    setTimeout(() => setAlert(null), duration);
+  };
 
   useEffect(() => {
     fetchProducts();
   }, [currentPage, searchTerm, minPrice, maxPrice]);
+
+  useEffect(() => {
+    if (selectedItem && showUpdateModal) {
+      formUpdate.setFieldsValue({
+        name: selectedItem.name,
+        price: selectedItem.price,
+        quantity: selectedItem.quantity,
+        description: selectedItem.description,
+        picture: [],
+      });
+    }
+  }, [selectedItem, showUpdateModal]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -67,8 +92,12 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      Object.keys(values).forEach((key) => {
-        formData.append(key, values[key]);
+      Object.entries(values).forEach(([key, value]) => {
+        if (key === "picture" && value?.[0]?.originFileObj) {
+          formData.append("picture", value[0].originFileObj);
+        } else {
+          formData.append(key, value);
+        }
       });
 
       await axiosInstance.post("/item/createNewItem", formData, {
@@ -78,12 +107,13 @@ const Dashboard = () => {
         withCredentials: true,
       });
 
-      message.success("Product created successfully!");
+      showAlert("success", "🎉 Product created successfully!");
       setShowCreateModal(false);
-      form.resetFields();
+      formCreate.resetFields();
       fetchProducts();
     } catch (error) {
       console.error("Error creating product:", error);
+      showAlert("error", "❌ Error creating product!");
     } finally {
       setLoading(false);
     }
@@ -93,8 +123,12 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      Object.keys(values).forEach((key) => {
-        formData.append(key, values[key]);
+      Object.entries(values).forEach(([key, value]) => {
+        if (key === "picture" && value?.[0]?.originFileObj) {
+          formData.append("picture", value[0].originFileObj);
+        } else {
+          formData.append(key, value);
+        }
       });
 
       await axiosInstance.put(`/item/${selectedItem.id}`, formData, {
@@ -103,11 +137,13 @@ const Dashboard = () => {
         },
         withCredentials: true,
       });
-      message.success("Updated successfully!");
+
+      showAlert("success", "✅ Product updated successfully!");
       setShowUpdateModal(false);
       fetchProducts();
     } catch (error) {
       console.error("Error updating product:", error);
+      showAlert("error", "❌ Error updating product!");
     } finally {
       setLoading(false);
     }
@@ -122,11 +158,46 @@ const Dashboard = () => {
         },
         withCredentials: true,
       });
-      message.success("Deleted successfully!");
+      showAlert("success", "🗑️ Xoá sản phẩm thành công!");
       fetchProducts();
     } catch (error) {
       console.error("Error deleting product:", error);
+      showAlert("error", "❌ Không thể xoá sản phẩm.");
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImportExcel = async (file) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await axiosInstance.post("/item/import", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        withCredentials: true,
+      });
+
+      const isErr = await axiosInstance.get("/item/getErrorItems", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        withCredentials: true,
+      });
+
+      if (isErr.data.length === 0) {
+        showAlert("success", "📥 Import Excel thành công!");
+      } else {
+        showAlert("error", "❌ Import thất bại, có dữ liệu lỗi.");
+      }
+    } catch (error) {
+      console.error("Error importing Excel file:", error);
+      showAlert("error", "❌ Lỗi khi import file.");
+    } finally {
+      fetchProducts();
       setLoading(false);
     }
   };
@@ -149,12 +220,18 @@ const Dashboard = () => {
           <Button
             onClick={() => {
               setSelectedItem(record);
-              form.setFieldsValue(record);
               setShowUpdateModal(true);
             }}
           >
             Update
           </Button>
+        </Space>
+      ),
+    },
+    {
+      title: "Status",
+      render: (_, record) => (
+        <Space>
           <Button danger onClick={() => handleDelete(record.id)}>
             Delete
           </Button>
@@ -166,6 +243,19 @@ const Dashboard = () => {
   return (
     <>
       <Nav />
+
+      {/* Alert */}
+      {alert && (
+        <Alert
+          type={alert.type}
+          message={alert.message}
+          showIcon
+          closable
+          onClose={() => setAlert(null)}
+          style={{ marginBottom: 16 }}
+        />
+      )}
+
       <div style={{ padding: 24 }}>
         <Typography.Title level={2}>Product List</Typography.Title>
 
@@ -187,6 +277,17 @@ const Dashboard = () => {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
           />
+          <Upload
+            accept=".xlsx"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              setFileImport(file);
+              handleImportExcel(file);
+              return false;
+            }}
+          >
+            <Button icon={<FileExcelOutlined />}>Import Excel</Button>
+          </Upload>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -213,13 +314,14 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Create Modal */}
       <Modal
         open={showCreateModal}
         title="Create Product"
         onCancel={() => setShowCreateModal(false)}
-        onOk={() => form.submit()}
+        onOk={() => formCreate.submit()}
       >
-        <Form layout="vertical" form={form} onFinish={handleCreate}>
+        <Form layout="vertical" form={formCreate} onFinish={handleCreate}>
           <Form.Item name="name" label="Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
@@ -236,7 +338,12 @@ const Dashboard = () => {
           <Form.Item name="description" label="Description">
             <Input.TextArea />
           </Form.Item>
-          <Form.Item name="picture" label="Upload Image" valuePropName="file">
+          <Form.Item
+            name="picture"
+            label="Upload Image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
+          >
             <Upload beforeUpload={() => false} maxCount={1}>
               <Button icon={<UploadOutlined />}>Click to Upload</Button>
             </Upload>
@@ -244,13 +351,14 @@ const Dashboard = () => {
         </Form>
       </Modal>
 
+      {/* Update Modal */}
       <Modal
         open={showUpdateModal}
         title="Update Product"
         onCancel={() => setShowUpdateModal(false)}
-        onOk={() => form.submit()}
+        onOk={() => formUpdate.submit()}
       >
-        <Form layout="vertical" form={form} onFinish={handleUpdate}>
+        <Form layout="vertical" form={formUpdate} onFinish={handleUpdate}>
           <Form.Item name="name" label="Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
@@ -270,7 +378,8 @@ const Dashboard = () => {
           <Form.Item
             name="picture"
             label="Upload New Image"
-            valuePropName="file"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
           >
             <Upload beforeUpload={() => false} maxCount={1}>
               <Button icon={<UploadOutlined />}>Click to Upload</Button>

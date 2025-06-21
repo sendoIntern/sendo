@@ -24,11 +24,11 @@ function CardItem() {
   const [maxPrice, setMaxPrice] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 6;
+  const [limit, setlimitPage] = useState(6);
 
   useEffect(() => {
     fetchProducts(currentPage);
-  }, [currentPage]);
+  }, [currentPage, limit]);
 
   const fetchProducts = async (page = 1) => {
     try {
@@ -62,6 +62,12 @@ function CardItem() {
     fetchProducts(1);
   };
 
+  const handleChangeLimitPage = (value) => {
+    setlimitPage(value);
+    setCurrentPage(1);
+    fetchProducts(1);
+  };
+
   const showModal = async (item) => {
     try {
       const res = await axiosInstance.get(`/item/getItemById/${item.id}`, {
@@ -75,6 +81,12 @@ function CardItem() {
     } catch (error) {
       console.error("Error fetching item details:", error);
     }
+  };
+
+  const handleClearFilters = () => {
+    setMinPrice(null);
+    setMaxPrice(null);
+    setCurrentPage(1);
   };
 
   const handleCancel = () => {
@@ -98,18 +110,84 @@ function CardItem() {
           <InputNumber
             placeholder="Min Price"
             value={minPrice}
-            onChange={(value) => setMinPrice(value)}
+            min={0}
+            // Hiển thị định dạng số có dấu phẩy
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            // Chỉ cho nhập ký tự 0–9
+            parser={(value) => value.replace(/[^\d]/g, "")}
+            onChange={(value) => {
+              if (typeof value === "number" && !isNaN(value)) {
+                setMinPrice(value);
+              }
+            }}
+            onKeyDown={(e) => {
+              const allowedKeys = [
+                "Backspace",
+                "Delete",
+                "ArrowLeft",
+                "ArrowRight",
+                "Tab",
+              ];
+              if (!/[0-9]/.test(e.key) && !allowedKeys.includes(e.key)) {
+                e.preventDefault();
+              }
+            }}
             style={{ width: "100%", marginBottom: 12 }}
           />
+
           <InputNumber
             placeholder="Max Price"
             value={maxPrice}
-            onChange={(value) => setMaxPrice(value)}
+            min={0}
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            parser={(value) => value.replace(/[^\d]/g, "")}
+            onChange={(value) => {
+              if (typeof value === "number" && !isNaN(value)) {
+                setMaxPrice(value);
+              }
+            }}
+            onKeyDown={(e) => {
+              const allowedKeys = [
+                "Backspace",
+                "Delete",
+                "ArrowLeft",
+                "ArrowRight",
+                "Tab",
+              ];
+              if (!/[0-9]/.test(e.key) && !allowedKeys.includes(e.key)) {
+                e.preventDefault();
+              }
+            }}
             style={{ width: "100%", marginBottom: 16 }}
           />
+
+          <br />
+          <Button style={{ marginBottom: 16 }} onClick={handleClearFilters}>
+            Clear Filters
+          </Button>
+
           <Button type="primary" block onClick={handleFilter}>
             Apply Filter
           </Button>
+
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <Title level={5}>Số sản phẩm hiển thị cho 1 trang</Title>
+            <Button.Group>
+              {[2, 4, 6].map((num) => (
+                <Button
+                  key={num}
+                  type={limit === num ? "primary" : "default"}
+                  onClick={() => handleChangeLimitPage(num)}
+                >
+                  {num}
+                </Button>
+              ))}
+            </Button.Group>
+          </div>
         </Col>
 
         {/* Product List */}
@@ -154,7 +232,12 @@ function CardItem() {
               </Col>
             ))}
           </Row>
-          <div style={{ textAlign: "center", marginTop: 24 }}>
+          <Row
+            style={{
+              marginTop: 24,
+              justifyContent: "center",
+            }}
+          >
             <Pagination
               current={currentPage}
               total={totalPages * limit}
@@ -165,7 +248,7 @@ function CardItem() {
               }}
               showSizeChanger={false}
             />
-          </div>
+          </Row>
         </Col>
       </Row>
 
