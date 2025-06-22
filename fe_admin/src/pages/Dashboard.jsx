@@ -19,6 +19,8 @@ import {
 } from "@ant-design/icons";
 import Nav from "../components/Nav";
 
+import "../lib/inputValidate";
+
 const Dashboard = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -322,17 +324,59 @@ const Dashboard = () => {
         onOk={() => formCreate.submit()}
       >
         <Form layout="vertical" form={formCreate} onFinish={handleCreate}>
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[
+              { required: true, message: "Vui lòng nhập tên" },
+              {
+                validator: (_, value) => {
+                  if (!value || inputValidate.isValidName(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(
+                      "Tên không hợp lệ (chỉ chứa chữ và dài 2-20 ký tự)"
+                    )
+                  );
+                },
+              },
+            ]}
+          >
             <Input />
           </Form.Item>
           <Form.Item
             name="quantity"
             label="Quantity"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số lượng" },
+              {
+                validator: (_, value) => {
+                  if (!value || inputValidate.isValidQuantity(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Số lượng không hợp lệ"));
+                },
+              },
+            ]}
           >
             <Input type="number" />
           </Form.Item>
-          <Form.Item name="price" label="Price" rules={[{ required: true }]}>
+          <Form.Item
+            name="price"
+            label="Price"
+            rules={[
+              { required: true, message: "Vui lòng nhập giá" },
+              {
+                validator: (_, value) => {
+                  if (!value || inputValidate.isValidPrice(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Giá không hợp lệ"));
+                },
+              },
+            ]}
+          >
             <Input type="number" />
           </Form.Item>
           <Form.Item name="description" label="Description">
@@ -359,17 +403,59 @@ const Dashboard = () => {
         onOk={() => formUpdate.submit()}
       >
         <Form layout="vertical" form={formUpdate} onFinish={handleUpdate}>
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[
+              { required: true, message: "Vui lòng nhập tên" },
+              {
+                validator: (_, value) => {
+                  if (!value || inputValidate.isValidName(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(
+                      "Tên không hợp lệ (chỉ chứa chữ và dài 2-20 ký tự)"
+                    )
+                  );
+                },
+              },
+            ]}
+          >
             <Input />
           </Form.Item>
           <Form.Item
             name="quantity"
             label="Quantity"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số lượng" },
+              {
+                validator: (_, value) => {
+                  if (!value || inputValidate.isValidQuantity(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Số lượng không hợp lệ"));
+                },
+              },
+            ]}
           >
             <Input type="number" />
           </Form.Item>
-          <Form.Item name="price" label="Price" rules={[{ required: true }]}>
+          <Form.Item
+            name="price"
+            label="Price"
+            rules={[
+              { required: true, message: "Vui lòng nhập giá" },
+              {
+                validator: (_, value) => {
+                  if (!value || inputValidate.isValidPrice(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Giá không hợp lệ"));
+                },
+              },
+            ]}
+          >
             <Input type="number" />
           </Form.Item>
           <Form.Item name="description" label="Description">
