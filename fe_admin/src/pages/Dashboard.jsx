@@ -84,6 +84,7 @@ const Dashboard = () => {
         setData(res.data.data);
         setTotalPages(res.data.pagination?.total_pages || 1);
       }
+      console.log(res.data);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -116,7 +117,7 @@ const Dashboard = () => {
       fetchProducts();
     } catch (error) {
       console.error("Error creating product:", error);
-      showAlert("error", "❌ Error creating product!");
+      showAlert("error", "Error creating product!");
     } finally {
       setLoading(false);
     }
@@ -141,12 +142,12 @@ const Dashboard = () => {
         withCredentials: true,
       });
 
-      showAlert("success", "✅ Product updated successfully!");
+      showAlert("success", "Product updated successfully!");
       setShowUpdateModal(false);
       fetchProducts();
     } catch (error) {
       console.error("Error updating product:", error);
-      showAlert("error", "❌ Error updating product!");
+      showAlert("error", "Error updating product!");
     } finally {
       setLoading(false);
     }
@@ -166,6 +167,30 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error deleting product:", error);
       showAlert("error", "❌ Không thể xoá sản phẩm.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangeStatus = async (record) => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.patch(
+        `/item/changeStatus/${record.id}`,
+
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          withCredentials: true,
+        }
+      );
+      showAlert("success", `Trạng thái sản phẩm đã được đổi thành công!`);
+      console.log(res.data);
+      fetchProducts();
+    } catch (error) {
+      console.error("Error changing product status:", error);
+      showAlert("error", "❌ Lỗi khi thay đổi trạng thái sản phẩm.");
     } finally {
       setLoading(false);
     }
@@ -234,11 +259,9 @@ const Dashboard = () => {
     {
       title: "Status",
       render: (_, record) => (
-        <Space>
-          <Button danger onClick={() => handleDelete(record.id)}>
-            active
-          </Button>
-        </Space>
+        <Button onClick={() => handleChangeStatus(record)}>
+          {record.is_active ? "Active" : "Inactive"}
+        </Button>
       ),
     },
   ];

@@ -71,12 +71,16 @@ function CardItem() {
 
   const showModal = async (item) => {
     try {
-      const res = await axiosInstance.get(`/item/getItemById/${item.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        withCredentials: true,
-      });
+      const res = await axiosInstance.get(
+        `/item/getItemById/${item.id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          withCredentials: true,
+        }
+      );
       setSelectedItem(res.data.data);
       setIsModalOpen(true);
     } catch (error) {
