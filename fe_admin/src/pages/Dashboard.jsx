@@ -21,6 +21,7 @@ import {
 import Nav from "../components/Nav";
 
 import { inputValidate } from "../lib/inputValidate";
+import Link from "antd/es/typography/Link";
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
@@ -38,6 +39,8 @@ const Dashboard = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
+
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const [alert, setAlert] = useState(null); // { type: "success" | "error", message: string }
 
@@ -153,31 +156,31 @@ const Dashboard = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    setLoading(true);
-    try {
-      await axiosInstance.delete(`/item/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        withCredentials: true,
-      });
-      showAlert("success", "🗑️ Xoá sản phẩm thành công!");
-      fetchProducts();
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      showAlert("error", "❌ Không thể xoá sản phẩm.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleDelete = async (id) => {
+  //   setLoading(true);
+  //   try {
+  //     await axiosInstance.delete(`/item/${id}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  //       },
+  //       withCredentials: true,
+  //     });
+  //     showAlert("success", "🗑️ Xoá sản phẩm thành công!");
+  //     fetchProducts();
+  //   } catch (error) {
+  //     console.error("Error deleting product:", error);
+  //     showAlert("error", "❌ Không thể xoá sản phẩm.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleChangeStatus = async (record) => {
     setLoading(true);
     try {
       const res = await axiosInstance.patch(
         `/item/changeStatus/${record.id}`,
-
+        {},
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -208,7 +211,7 @@ const Dashboard = () => {
         },
         withCredentials: true,
       });
-
+      console.log("import ok");
       const isErr = await axiosInstance.get("/item/getErrorItems", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -237,7 +240,11 @@ const Dashboard = () => {
       render: (src) => <img src={src} alt="product" style={{ width: 50 }} />,
     },
     { title: "Name", dataIndex: "name" },
-    { title: "Price", dataIndex: "price" },
+    {
+      title: "Price",
+      dataIndex: "price",
+      render: (value) => `${value.toLocaleString()} $`,
+    },
     { title: "Quantity", dataIndex: "quantity" },
     { title: "Description", dataIndex: "description" },
     { title: "View", dataIndex: "view" },
@@ -303,17 +310,13 @@ const Dashboard = () => {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
           />
-          <Upload
-            accept=".xlsx"
-            showUploadList={false}
-            beforeUpload={(file) => {
-              setFileImport(file);
-              handleImportExcel(file);
-              return false;
-            }}
+          <Button
+            type="primary"
+            icon={<FileExcelOutlined />}
+            onClick={() => setShowImportModal(true)}
           >
-            <Button icon={<FileExcelOutlined />}>Import File</Button>
-          </Upload>
+            Import File
+          </Button>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -513,6 +516,30 @@ const Dashboard = () => {
             </Upload>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Import Modal */}
+      <Modal
+        open={showImportModal}
+        title="Import Products from Excel"
+        onCancel={() => setShowImportModal(false)}
+        footer={null}
+      >
+        <Upload
+          accept=".xlsx"
+          showUploadList={false}
+          beforeUpload={(file) => {
+            setFileImport(file);
+            handleImportExcel(file);
+            return false;
+          }}
+        >
+          <Button icon={<FileExcelOutlined />}>Import File</Button>
+        </Upload>
+        <br />
+        <Link href="\ItemIport.xlsx" download>
+          Tải file mẫu ở đây
+        </Link>
       </Modal>
     </>
   );
