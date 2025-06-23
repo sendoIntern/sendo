@@ -83,7 +83,7 @@ func GetAllItemsHandler(c *gin.Context) {
 func GetItemByIdHandler(c *gin.Context) {
 	database := db.GetDB()
 	var item entity.Item
-	id := c.Param("itemId")
+	id := c.Param("id")
 	result := database.First(&item, "id = ?", id)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, response.APIResponse{
