@@ -31,6 +31,7 @@ func CreateItem(req request.ItemCreationRequest) (entity.Item, error) {
 		Description: req.Description,
 		Quantity:    req.Quantity,
 		Price:       req.Price,
+		Status:      true,
 		Picture:     imageURL,
 	}
 
@@ -47,6 +48,14 @@ func DeleteItem(id string) error {
 		return err
 	}
 	return repository.DeleteItem(uid)
+}
+
+func ActiveItem(id string) error {
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	return repository.ActiveItem(uid)
 }
 
 func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error) {

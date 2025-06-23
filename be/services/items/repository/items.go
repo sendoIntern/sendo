@@ -20,12 +20,25 @@ func CreateItem(item entity.Item) error {
 }
 
 func DeleteItem(id uuid.UUID) error {
-	result := database.Delete(&entity.Item{}, id)
-	if result.Error != nil {
-		return result.Error
+	item, exist := IsExistItem(id)
+	if !exist {
+		return errors.New("ITEM NOT FOUND")
 	}
-	if result.RowsAffected == 0 {
-		return errors.New("item not found")
+	item.Status = false
+	if err := database.Save(&item).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func ActiveItem(id uuid.UUID) error {
+	item, exist := IsExistItem(id)
+	if !exist {
+		return errors.New("ITEM NOT FOUND")
+	}
+	item.Status = true
+	if err := database.Save(&item).Error; err != nil {
+		return err
 	}
 	return nil
 }

@@ -171,6 +171,26 @@ func DeleteItemHandler(c *gin.Context) {
 		Message: "Item deleted successfully",
 	})
 }
+func ActiveItemHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	err := usecase.ActiveItem(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.APIResponse{
+			Status:  "Fail",
+			Message: "Item Activation Error",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	cache.ClearCacheByKey("items:*") // invalidate cache
+
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Item activated successfully",
+	})
+}
 
 func UpdateItemByIdHandler(c *gin.Context) {
 	id := c.Param("id")

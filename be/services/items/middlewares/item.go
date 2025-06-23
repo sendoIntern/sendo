@@ -20,7 +20,7 @@ import (
 func ItemIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		database := db.GetDB()
-		id := c.Param("itemId")
+		id := c.Param("id")
 
 		// Kiểm tra xem item có tồn tại không
 		var item entity.Item

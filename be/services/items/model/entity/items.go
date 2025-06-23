@@ -16,6 +16,7 @@ type Item struct {
 	Picture     string    `json:"picture"`
 	View        int64     `json:"view" gorm:"default:0"`
 	Recommend   int64     `json:"recommend" gorm:"default:0"`
+	Status      bool      `json:"is_active" gorm:"default:true"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
