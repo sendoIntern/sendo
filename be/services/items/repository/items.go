@@ -31,16 +31,16 @@ func DeleteItem(id uuid.UUID) error {
 	return nil
 }
 
-func ActiveItem(id uuid.UUID) error {
+func ChangeStatusItem(id uuid.UUID) (entity.Item, error) {
 	item, exist := IsExistItem(id)
 	if !exist {
-		return errors.New("ITEM NOT FOUND")
+		return item, errors.New("ITEM NOT FOUND")
 	}
-	item.Status = true
+	item.Status = !item.Status
 	if err := database.Save(&item).Error; err != nil {
-		return err
+		return item, err
 	}
-	return nil
+	return item, nil
 }
 
 func UpdateItem(item entity.Item) error {

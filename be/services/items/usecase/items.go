@@ -50,12 +50,12 @@ func DeleteItem(id string) error {
 	return repository.DeleteItem(uid)
 }
 
-func ActiveItem(id string) error {
+func ChangeStatusItem(id string) (entity.Item, error) {
 	uid, err := uuid.Parse(id)
 	if err != nil {
-		return err
+		return entity.Item{}, err
 	}
-	return repository.ActiveItem(uid)
+	return repository.ChangeStatusItem(uid)
 }
 
 func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error) {
