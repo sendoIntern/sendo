@@ -11,6 +11,7 @@ import {
   Typography,
 } from "antd";
 import { axiosInstance } from "../lib/axios";
+import { inputValidate } from "../lib/inputValidate";
 
 const { Title, Paragraph } = Typography;
 
@@ -111,27 +112,12 @@ function CardItem() {
             placeholder="Min Price"
             value={minPrice}
             min={0}
-            // Hiển thị định dạng số có dấu phẩy
-            formatter={(value) =>
-              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }
-            // Chỉ cho nhập ký tự 0–9
-            parser={(value) => value.replace(/[^\d]/g, "")}
+            formatter={inputValidate.formatNumberWithCommas}
+            parser={inputValidate.parseNumberFromString}
+            onKeyDown={inputValidate.restrictNumberInputKeys}
             onChange={(value) => {
               if (typeof value === "number" && !isNaN(value)) {
                 setMinPrice(value);
-              }
-            }}
-            onKeyDown={(e) => {
-              const allowedKeys = [
-                "Backspace",
-                "Delete",
-                "ArrowLeft",
-                "ArrowRight",
-                "Tab",
-              ];
-              if (!/[0-9]/.test(e.key) && !allowedKeys.includes(e.key)) {
-                e.preventDefault();
               }
             }}
             style={{ width: "100%", marginBottom: 12 }}
@@ -141,25 +127,12 @@ function CardItem() {
             placeholder="Max Price"
             value={maxPrice}
             min={0}
-            formatter={(value) =>
-              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }
-            parser={(value) => value.replace(/[^\d]/g, "")}
+            formatter={inputValidate.formatNumberWithCommas}
+            parser={inputValidate.parseNumberFromString}
+            onKeyDown={inputValidate.restrictNumberInputKeys}
             onChange={(value) => {
               if (typeof value === "number" && !isNaN(value)) {
                 setMaxPrice(value);
-              }
-            }}
-            onKeyDown={(e) => {
-              const allowedKeys = [
-                "Backspace",
-                "Delete",
-                "ArrowLeft",
-                "ArrowRight",
-                "Tab",
-              ];
-              if (!/[0-9]/.test(e.key) && !allowedKeys.includes(e.key)) {
-                e.preventDefault();
               }
             }}
             style={{ width: "100%", marginBottom: 16 }}
