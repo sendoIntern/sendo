@@ -11,6 +11,7 @@ import {
   Typography,
   Space,
   Alert,
+  InputNumber,
 } from "antd";
 import {
   UploadOutlined,
@@ -19,7 +20,7 @@ import {
 } from "@ant-design/icons";
 import Nav from "../components/Nav";
 
-import "../lib/inputValidate";
+import { inputValidate } from "../lib/inputValidate";
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
@@ -235,7 +236,7 @@ const Dashboard = () => {
       render: (_, record) => (
         <Space>
           <Button danger onClick={() => handleDelete(record.id)}>
-            Delete
+            active
           </Button>
         </Space>
       ),
@@ -288,7 +289,7 @@ const Dashboard = () => {
               return false;
             }}
           >
-            <Button icon={<FileExcelOutlined />}>Import Excel</Button>
+            <Button icon={<FileExcelOutlined />}>Import File</Button>
           </Upload>
           <Button
             type="primary"
@@ -335,9 +336,7 @@ const Dashboard = () => {
                     return Promise.resolve();
                   }
                   return Promise.reject(
-                    new Error(
-                      "Tên không hợp lệ (chỉ chứa chữ và dài 2-20 ký tự)"
-                    )
+                    "Tên không hợp lệ. Chỉ cho phép chữ cái và khoảng trắng, từ 2–50 ký tự."
                   );
                 },
               },
@@ -360,7 +359,12 @@ const Dashboard = () => {
               },
             ]}
           >
-            <Input type="number" />
+            <InputNumber
+              onKeyDown={inputValidate.restrictNumberInputKeys}
+              formatter={inputValidate.formatNumberWithCommas}
+              parser={inputValidate.parseNumberFromString}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
           <Form.Item
             name="price"
@@ -377,7 +381,11 @@ const Dashboard = () => {
               },
             ]}
           >
-            <Input type="number" />
+            <InputNumber
+              formatter={inputValidate.formatNumberWithCommas}
+              parser={inputValidate.parseNumberFromString}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
           <Form.Item name="description" label="Description">
             <Input.TextArea />
@@ -439,7 +447,12 @@ const Dashboard = () => {
               },
             ]}
           >
-            <Input type="number" />
+            <InputNumber
+              onKeyDown={inputValidate.restrictNumberInputKeys}
+              formatter={inputValidate.formatNumberWithCommas}
+              parser={inputValidate.parseNumberFromString}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
           <Form.Item
             name="price"
@@ -456,7 +469,12 @@ const Dashboard = () => {
               },
             ]}
           >
-            <Input type="number" />
+            <InputNumber
+              onKeyDown={inputValidate.restrictNumberInputKeys}
+              formatter={inputValidate.formatNumberWithCommas}
+              parser={inputValidate.parseNumberFromString}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
           <Form.Item name="description" label="Description">
             <Input.TextArea />
