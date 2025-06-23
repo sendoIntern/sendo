@@ -15,8 +15,7 @@ func ItemRoutes(r *gin.Engine) {
 		itemGroup.POST("/createNewItem", middleware.ValidateItemFields(), CreateItemHandler)
 
 		itemGroup.PUT("/:id", middleware.ValidateAccessToken(), middleware.ValidateItemFields(), UpdateItemByIdHandler)
-		itemGroup.DELETE("/:id", middleware.ValidateAccessToken(), middleware.ItemIDMiddleware(), DeleteItemHandler)
-		itemGroup.PATCH("/active/:id", middleware.ValidateAccessToken(), middleware.ItemIDMiddleware(), ActiveItemHandler)
+		itemGroup.PATCH("/changeStatus/:id", middleware.ValidateAccessToken(), middleware.ItemIDMiddleware(), ChangeStatusItemHandler)
 		itemGroup.POST("/import", middleware.ValidateAccessToken(), middleware.RequireExcelFileMiddleware(), UploadExcelHandler)
 		itemGroup.GET("/getErrorItems", middleware.ValidateAccessToken(), GetImportErrorsHandler)
 

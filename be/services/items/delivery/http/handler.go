@@ -151,14 +151,14 @@ func CreateItemHandler(c *gin.Context) {
 	})
 }
 
-func DeleteItemHandler(c *gin.Context) {
+func ChangeStatusItemHandler(c *gin.Context) {
 	id := c.Param("id")
 
-	err := usecase.DeleteItem(id)
+	item, err := usecase.ChangeStatusItem(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.APIResponse{
 			Status:  "Fail",
-			Message: "Item Deletion Error",
+			Message: "Change Item Status Error",
 			Error:   err.Error(),
 		})
 		return
@@ -168,27 +168,8 @@ func DeleteItemHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
-		Message: "Item deleted successfully",
-	})
-}
-func ActiveItemHandler(c *gin.Context) {
-	id := c.Param("id")
-
-	err := usecase.ActiveItem(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.APIResponse{
-			Status:  "Fail",
-			Message: "Item Activation Error",
-			Error:   err.Error(),
-		})
-		return
-	}
-
-	cache.ClearCacheByKey("items:*") // invalidate cache
-
-	c.JSON(http.StatusOK, response.APIResponse{
-		Status:  "Success",
-		Message: "Item activated successfully",
+		Message: "Change Item Status Successfully",
+		Data:    item,
 	})
 }
 
