@@ -153,18 +153,39 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
 		// Kiểm tra số lượng cột
 		if len(row) < 6 {
 			log.Printf("Row %d: Invalid number of columns, expected at least 6, got %d", i, len(row))
-			errs = append(errs, errors.New("Invalid columns at row:"+string(rune(i))))
+			errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid number of columns, expected at least 6"))
 			continue
 		}
-
-		price, _ := strconv.ParseFloat(row[3], 64)
-		quantity, _ := strconv.ParseInt(row[2], 10, 64)
-		view, _ := strconv.ParseInt(row[5], 10, 64)
+		// validate fields
+		name := row[0]
+		if repository.IsExistItemByName(name) {
+			errs = append(errs, errors.New("ROW "+string(rune(i))+": Duplicate name with an existed item"))
+			continue
+		}
+		price, err := strconv.ParseFloat(row[3], 64)
+		if err != nil || price < 0 {
+			errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid value at price column, expected positive float number"))
+			continue
+		}
+		quantity, err := strconv.ParseInt(row[2], 10, 64)
+		if err != nil || quantity < 0 {
+			errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid value at quantity column, expected positive integer number"))
+			continue
+		}
+		view, err := strconv.ParseInt(row[5], 10, 64)
+		if err != nil || view < 0 {
+			errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid value at view column, expected positive integer number"))
+			continue
+		}
 
 		// Mặc định recommend = 0 nếu không có cột 7
 		recommend := int64(0)
 		if len(row) > 6 {
-			recommend, _ = strconv.ParseInt(row[6], 10, 64)
+			recommend, err = strconv.ParseInt(row[6], 10, 64)
+			if err != nil || recommend < 0 {
+				errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid value at recommend column, expected positive integer number"))
+				continue
+			}
 		}
 
 		item := entity.Item{
@@ -182,7 +203,7 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
 		items = append(items, item)
 	}
 
-	return items, nil
+	return items, errs
 }
 
 func GetErrorItems() ([]entity.ImportError, error) {
