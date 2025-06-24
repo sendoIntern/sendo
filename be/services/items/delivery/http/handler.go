@@ -85,7 +85,7 @@ func GetAllItemsHandler(c *gin.Context) {
 
 	// Save full response to Redis cache
 	if data, err := json.Marshal(resp); err == nil {
-		_ = cache.SetCache(cacheKey, data, 10*time.Minute)
+		_ = cache.SetCache(cacheKey, data, 5*time.Minute)
 	}
 
 	c.JSON(http.StatusOK, resp)
