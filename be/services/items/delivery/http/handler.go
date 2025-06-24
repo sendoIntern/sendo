@@ -73,7 +73,7 @@ func GetAllItemsHandler(c *gin.Context) {
 
 	// ======= Cache original total if not exists =======
 	if totalItemErr != nil || originalTotalStr == "" {
-		_ = cache.SetCache(totalKey, paging.Total, 1*time.Hour)
+		_ = cache.SetCache(totalKey, paging.Total, 5*time.Minute)
 	}
 
 	// ======= Response =======
@@ -85,7 +85,7 @@ func GetAllItemsHandler(c *gin.Context) {
 
 	// Save full response to Redis cache
 	if data, err := json.Marshal(resp); err == nil {
-		_ = cache.SetCache(cacheKey, data, 5*time.Minute)
+		_ = cache.SetCache(cacheKey, data, 15*time.Minute)
 	}
 
 	c.JSON(http.StatusOK, resp)
