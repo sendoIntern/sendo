@@ -89,11 +89,21 @@ func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error)
 	return item, nil
 }
 
-func GetAllItems(p *pagination.Paging, search string, minPrice float64, maxPrice float64) ([]entity.Item, error) {
+func GetAllItems(
+	p *pagination.Paging,
+	search string,
+	minPrice float64,
+	maxPrice float64,
+	originalTotal int64) ([]entity.Item, error) {
+
 	p.Offset = (p.Page - 1) * p.Limit
-	items, err := repository.FetchItems(p, search, minPrice, maxPrice)
+	items, err := repository.FetchItems(p, search, minPrice, maxPrice, originalTotal)
 	if err != nil {
 		return items, err
+	}
+
+	if originalTotal > 0 && originalTotal < p.Total {
+		p.Total = originalTotal // original in cache
 	}
 	p.TotalPages = int(math.Ceil(float64(p.Total) / float64(p.Limit)))
 	return items, nil

@@ -69,9 +69,15 @@ func GetTopViewedItems() ([]entity.Item, error) {
 }
 
 // get items with search, filter and pagination
-func FetchItems(p *pagination.Paging, search string, minPrice float64, maxPrice float64) ([]entity.Item, error) {
+func FetchItems(
+	p *pagination.Paging,
+	search string,
+	minPrice float64,
+	maxPrice float64,
+	originalTotal int64) ([]entity.Item, error) {
+
 	var items []entity.Item
-	query := database.Model(&entity.Item{})
+	query := database.Model(&entity.Item{}).Where("status = true")
 
 	if search != "" {
 		query = query.Where("name ILIKE ? OR description ILIKE ?", "%"+search+"%", "%"+search+"%")
@@ -90,10 +96,16 @@ func FetchItems(p *pagination.Paging, search string, minPrice float64, maxPrice 
 		return nil, err
 	}
 
+	var currentOffset int
+	if originalTotal > 0 && originalTotal < p.Total {
+		currentOffset = p.Offset + int(p.Total-originalTotal)
+	} else {
+		currentOffset = p.Offset
+	}
 	// Truy vấn có paging
 	result := query.
 		Limit(p.Limit).
-		Offset(p.Offset).
+		Offset(currentOffset).
 		Order("created_at DESC").
 		Find(&items)
 	if result.Error != nil {
