@@ -21,6 +21,7 @@ import {
 import Nav from "../components/Nav";
 
 import { inputValidate } from "../lib/inputValidate";
+import Link from "antd/es/typography/Link";
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
@@ -38,6 +39,8 @@ const Dashboard = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
+
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const [alert, setAlert] = useState(null); // { type: "success" | "error", message: string }
 
@@ -84,6 +87,7 @@ const Dashboard = () => {
         setData(res.data.data);
         setTotalPages(res.data.pagination?.total_pages || 1);
       }
+      console.log(res.data);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -116,7 +120,7 @@ const Dashboard = () => {
       fetchProducts();
     } catch (error) {
       console.error("Error creating product:", error);
-      showAlert("error", "❌ Error creating product!");
+      showAlert("error", "Error creating product!");
     } finally {
       setLoading(false);
     }
@@ -141,31 +145,36 @@ const Dashboard = () => {
         withCredentials: true,
       });
 
-      showAlert("success", "✅ Product updated successfully!");
+      showAlert("success", "Product updated successfully!");
       setShowUpdateModal(false);
       fetchProducts();
     } catch (error) {
       console.error("Error updating product:", error);
-      showAlert("error", "❌ Error updating product!");
+      showAlert("error", "Error updating product!");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleChangeStatus = async (record) => {
     setLoading(true);
     try {
-      await axiosInstance.delete(`/item/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        withCredentials: true,
-      });
-      showAlert("success", "🗑️ Xoá sản phẩm thành công!");
+      const res = await axiosInstance.patch(
+        `/item/changeStatus/${record.id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          withCredentials: true,
+        }
+      );
+      showAlert("success", `Trạng thái sản phẩm đã được đổi thành công!`);
+      console.log(res.data);
       fetchProducts();
     } catch (error) {
-      console.error("Error deleting product:", error);
-      showAlert("error", "❌ Không thể xoá sản phẩm.");
+      console.error("Error changing product status:", error);
+      showAlert("error", "❌ Lỗi khi thay đổi trạng thái sản phẩm.");
     } finally {
       setLoading(false);
     }
@@ -183,7 +192,7 @@ const Dashboard = () => {
         },
         withCredentials: true,
       });
-
+      console.log("import ok");
       const isErr = await axiosInstance.get("/item/getErrorItems", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -212,7 +221,11 @@ const Dashboard = () => {
       render: (src) => <img src={src} alt="product" style={{ width: 50 }} />,
     },
     { title: "Name", dataIndex: "name" },
-    { title: "Price", dataIndex: "price" },
+    {
+      title: "Price",
+      dataIndex: "price",
+      render: (value) => `${value.toLocaleString()} $`,
+    },
     { title: "Quantity", dataIndex: "quantity" },
     { title: "Description", dataIndex: "description" },
     { title: "View", dataIndex: "view" },
@@ -233,12 +246,22 @@ const Dashboard = () => {
     },
     {
       title: "Status",
+      dataIndex: "is_active", // cần thiết cho filter hoạt động đúng
+      filters: [
+        {
+          text: "Active",
+          value: true,
+        },
+        {
+          text: "Inactive",
+          value: false,
+        },
+      ],
+      onFilter: (value, record) => record.is_active === value,
       render: (_, record) => (
-        <Space>
-          <Button danger onClick={() => handleDelete(record.id)}>
-            active
-          </Button>
-        </Space>
+        <Button onClick={() => handleChangeStatus(record)}>
+          {record.is_active ? "Active" : "Inactive"}
+        </Button>
       ),
     },
   ];
@@ -280,17 +303,13 @@ const Dashboard = () => {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
           />
-          <Upload
-            accept=".xlsx"
-            showUploadList={false}
-            beforeUpload={(file) => {
-              setFileImport(file);
-              handleImportExcel(file);
-              return false;
-            }}
+          <Button
+            type="primary"
+            icon={<FileExcelOutlined />}
+            onClick={() => setShowImportModal(true)}
           >
-            <Button icon={<FileExcelOutlined />}>Import File</Button>
-          </Upload>
+            Import File
+          </Button>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -306,6 +325,10 @@ const Dashboard = () => {
           loading={loading}
           rowKey="id"
           pagination={false}
+          onChange={(pagination, filters) => {
+            // xử lý filter nếu cần theo dõi trạng thái
+            console.log("Filters: ", filters);
+          }}
         />
 
         <Pagination
@@ -490,6 +513,30 @@ const Dashboard = () => {
             </Upload>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Import Modal */}
+      <Modal
+        open={showImportModal}
+        title="Import Products from Excel"
+        onCancel={() => setShowImportModal(false)}
+        footer={null}
+      >
+        <Upload
+          accept=".xlsx"
+          showUploadList={false}
+          beforeUpload={(file) => {
+            setFileImport(file);
+            handleImportExcel(file);
+            return false;
+          }}
+        >
+          <Button icon={<FileExcelOutlined />}>Import File</Button>
+        </Upload>
+        <br />
+        <Link href="\ItemIport.xlsx" download>
+          Tải file mẫu ở đây
+        </Link>
       </Modal>
     </>
   );
