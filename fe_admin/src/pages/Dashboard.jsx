@@ -156,25 +156,6 @@ const Dashboard = () => {
     }
   };
 
-  // const handleDelete = async (id) => {
-  //   setLoading(true);
-  //   try {
-  //     await axiosInstance.delete(`/item/${id}`, {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-  //       },
-  //       withCredentials: true,
-  //     });
-  //     showAlert("success", "🗑️ Xoá sản phẩm thành công!");
-  //     fetchProducts();
-  //   } catch (error) {
-  //     console.error("Error deleting product:", error);
-  //     showAlert("error", "❌ Không thể xoá sản phẩm.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleChangeStatus = async (record) => {
     setLoading(true);
     try {
@@ -265,6 +246,18 @@ const Dashboard = () => {
     },
     {
       title: "Status",
+      dataIndex: "is_active", // cần thiết cho filter hoạt động đúng
+      filters: [
+        {
+          text: "Active",
+          value: true,
+        },
+        {
+          text: "Inactive",
+          value: false,
+        },
+      ],
+      onFilter: (value, record) => record.is_active === value,
       render: (_, record) => (
         <Button onClick={() => handleChangeStatus(record)}>
           {record.is_active ? "Active" : "Inactive"}
@@ -332,6 +325,10 @@ const Dashboard = () => {
           loading={loading}
           rowKey="id"
           pagination={false}
+          onChange={(pagination, filters) => {
+            // xử lý filter nếu cần theo dõi trạng thái
+            console.log("Filters: ", filters);
+          }}
         />
 
         <Pagination

@@ -196,7 +196,7 @@ function CardItem() {
                     }
                   />
                   <Title level={5} style={{ marginTop: 12 }}>
-                    Price: {item.price}
+                    Price: {inputValidate.formatNumberWithCommas(item.price)}$
                   </Title>
                   <Button type="link" block>
                     Buy
