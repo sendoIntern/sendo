@@ -3,21 +3,21 @@ package http
 import (
 	"be/pkg/db"
 	"be/pkg/pagination"
+	"be/pkg/rabbitmq"
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
 	"be/services/items/model/response"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"be/pkg/cache"
-	"be/pkg/rabbitmq"
 
 	"be/services/items/usecase"
 	"net/http"
 	"strconv"
+
+	"errors"
 
 	"github.com/gin-gonic/gin"
 )
@@ -230,6 +230,35 @@ func UpdateItemByIdHandler(c *gin.Context) {
 	})
 }
 
+func ConfirmImportExcel(c *gin.Context) {
+
+	var req struct {
+		Items []entity.Item `json:"items"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.APIResponse{
+			Status:  "Fail",
+			Message: "Invalid items list",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	// publish item to rabbitmq
+	var errs []error
+	for i, item := range req.Items {
+		if err := rabbitmq.Publish(item); err != nil {
+			errs = append(errs, errors.New("Publish item error:"+string(rune(i))+"__"+err.Error()))
+		}
+	}
+
+	c.JSON(http.StatusOK, response.APIResponse{
+		Status:  "Success",
+		Message: "Items published successfully",
+		Data:    errs,
+	})
+}
+
 func UploadExcelHandler(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -240,26 +269,14 @@ func UploadExcelHandler(c *gin.Context) {
 		})
 		return
 	}
-	var errs []error
 	items, parseErrs := usecase.ParseExcel(file)
-	if parseErrs != nil {
-		errs = append(errs, parseErrs...)
-	}
-	if len(items) != 0 {
-		for i := range items {
-			item := items[i]
-			if err := rabbitmq.Publish(item); err != nil {
-				log.Printf(" Publish error: %v\n", err)
-				errs = append(errs, errors.New("Publish item error:"+string(rune(i))+"__"+err.Error()))
-			}
-		}
-	}
 
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
-		Message: "Items imported to queue successfully",
+		Message: "Upload excel file successfully",
 		Data: map[string]interface{}{
-			"errors": errs,
+			"items":  items,
+			"errors": parseErrs,
 		},
 	})
 }
