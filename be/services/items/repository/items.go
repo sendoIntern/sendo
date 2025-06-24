@@ -59,6 +59,12 @@ func IsExistItem(id uuid.UUID) (entity.Item, bool) {
 	return item, true
 }
 
+func IsExistItemByName(name string) bool {
+	var item entity.Item
+	result := database.First(&item, "name = ?", name)
+	return result.Error == nil
+}
+
 // lấy 3 item có view cao nhất
 func GetTopViewedItems() ([]entity.Item, error) {
 	var items []entity.Item
