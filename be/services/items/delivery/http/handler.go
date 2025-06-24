@@ -23,40 +23,45 @@ import (
 )
 
 func GetAllItemsHandler(c *gin.Context) {
-	search := c.DefaultQuery("search", "") // search string for name or description
+	// ======= Parse query params =======
+	search := c.DefaultQuery("search", "")
 	minPriceStr := c.DefaultQuery("minPrice", "0")
 	maxPriceStr := c.DefaultQuery("maxPrice", "0")
-
-	minPrice, _ := strconv.ParseFloat(minPriceStr, 64) // min price filter
-	maxPrice, _ := strconv.ParseFloat(maxPriceStr, 64) // max price filter
-
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "6")
 
-	page, _ := strconv.Atoi(pageStr)   // page index
-	limit, _ := strconv.Atoi(limitStr) // limit number for a page
+	minPrice, _ := strconv.ParseFloat(minPriceStr, 64)
+	maxPrice, _ := strconv.ParseFloat(maxPriceStr, 64)
+	page, _ := strconv.Atoi(pageStr)
+	limit, _ := strconv.Atoi(limitStr)
 
 	paging := pagination.Paging{
 		Page:  page,
 		Limit: limit,
 	}
 
-	// ------------------- REDIS CACHE -------------------
-	cacheKey := fmt.Sprintf("items:search=%s:minPrice=%s:maxPrice=%s:page=%s:limit=%s",
-		search, minPriceStr, maxPriceStr, pageStr, limitStr)
+	// ======= Cache key setup =======
+	baseKey := fmt.Sprintf("items:search=%s:min=%s:max=%s", search, minPriceStr, maxPriceStr)
+	cacheKey := fmt.Sprintf("%s:page=%s:limit=%s", baseKey, pageStr, limitStr)
+	totalKey := fmt.Sprintf("%s:originalTotal", baseKey)
 
-	// Check cache
-	cached, err := cache.GetCache(cacheKey)
-	if err == nil && cached != "" {
+	// ======= Try get from cache =======
+	if cached, err := cache.GetCache(cacheKey); err == nil && cached != "" {
 		var cachedResp response.APIResponse
 		if err := json.Unmarshal([]byte(cached), &cachedResp); err == nil {
 			c.JSON(http.StatusOK, cachedResp)
 			return
 		}
 	}
-	// ---------------------------------------------------
 
-	items, err := usecase.GetAllItems(&paging, search, minPrice, maxPrice)
+	originalTotalStr, totalItemErr := cache.GetCache(totalKey)
+	originalTotal, _ := strconv.ParseInt(originalTotalStr, 10, 64)
+	if totalItemErr != nil || originalTotalStr == "" {
+		originalTotal = 0
+	}
+
+	// ======= Query database =======
+	items, err := usecase.GetAllItems(&paging, search, minPrice, maxPrice, originalTotal)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.APIResponse{
 			Status:  "Fail",
@@ -66,18 +71,24 @@ func GetAllItemsHandler(c *gin.Context) {
 		return
 	}
 
+	// ======= Cache original total if not exists =======
+	if totalItemErr != nil || originalTotalStr == "" {
+		_ = cache.SetCache(totalKey, paging.Total, 1*time.Hour)
+	}
+
+	// ======= Response =======
 	resp := response.APIResponse{
 		Status:     "Success",
 		Pagination: paging,
 		Data:       items,
 	}
 
-	// Save to Redis
-	data, _ := json.Marshal(resp)
-	cache.SetCache(cacheKey, data, 10*time.Minute)
+	// Save full response to Redis cache
+	if data, err := json.Marshal(resp); err == nil {
+		_ = cache.SetCache(cacheKey, data, 10*time.Minute)
+	}
 
 	c.JSON(http.StatusOK, resp)
-
 }
 
 func GetItemByIdHandler(c *gin.Context) {
@@ -141,8 +152,6 @@ func CreateItemHandler(c *gin.Context) {
 		Picture:     item.Picture,
 		CreatedAt:   item.CreatedAt,
 	}
-
-	cache.ClearCacheByKey("items:*") // invalidate cache
 
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
@@ -245,8 +254,6 @@ func UploadExcelHandler(c *gin.Context) {
 			}
 		}
 	}
-
-	cache.ClearCacheByKey("items:*") // invalidate cache
 
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
