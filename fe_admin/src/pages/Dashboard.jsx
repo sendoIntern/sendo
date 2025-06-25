@@ -216,27 +216,24 @@ const Dashboard = () => {
   const handleConfirmFileImport = async () => {
     setLoading(true);
     try {
-      const payload = { items: selectedImportItems };
-      console.log(payload);
-      await axiosInstance.post(
-        "/item/import/confirm",
-        { payload },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          withCredentials: true,
-        }
-      );
-
-      setSelectedImportItems([]);
+      const payload = {
+        items: selectedImportItems,
+      };
+      await axiosInstance.post("/item/import/confirm", payload, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        withCredentials: true,
+      });
     } catch (error) {
       console.error("Error confirming file import:", error);
-      showAlert("error", "❌ Lỗi khi xác nhận file import.");
+      showAlert("error", "Lỗi khi xác nhận file import.");
     } finally {
       setLoading(false);
       setFileExcelImport(null);
       fetchProducts();
+      setConfirmImportModal(false);
+      setSelectedImportItems([]);
     }
   };
 
