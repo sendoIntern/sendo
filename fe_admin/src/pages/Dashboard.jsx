@@ -54,7 +54,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, searchTerm, minPrice, maxPrice]);
+  }, [currentPage, searchTerm, minPrice, maxPrice, statusFillter]);
 
   useEffect(() => {
     if (selectedItem && showUpdateModal) {
@@ -116,7 +116,7 @@ const Dashboard = () => {
         withCredentials: true,
       });
 
-      showAlert("success", "🎉 Product created successfully!");
+      showAlert("success", "Product created successfully!");
       setShowCreateModal(false);
       formCreate.resetFields();
       fetchProducts();
@@ -259,6 +259,7 @@ const Dashboard = () => {
           value: false,
         },
       ],
+      filterMultiple: false,
       render: (_, record) => (
         <Button onClick={() => handleChangeStatus(record)}>
           {record.is_active ? "Active" : "Inactive"}
@@ -330,7 +331,8 @@ const Dashboard = () => {
             const activeStatus = filters?.is_active?.[0]; // true / false
             setStatusFillter(activeStatus);
             console.log("after set", activeStatus);
-            fetchProducts(); // 👈 Gọi lại API
+            fetchProducts();
+            console.log("sau khi fetch");
           }}
         />
 
