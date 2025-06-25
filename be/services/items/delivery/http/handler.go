@@ -17,8 +17,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"errors"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -246,10 +244,12 @@ func ConfirmImportExcel(c *gin.Context) {
 	}
 
 	// publish item to rabbitmq
-	var errs []error
+	var errs []entity.ImportError
 	for i, item := range req.Items {
 		if err := rabbitmq.Publish(item); err != nil {
-			errs = append(errs, errors.New("Publish item error:"+string(rune(i))+"__"+err.Error()))
+			errs = append(errs, entity.ImportError{
+				Description: fmt.Sprintf("PUBLISH ERROR AT ITEM(%d)_%s: %s", i, item.Name, err.Error()),
+			})
 		}
 	}
 
