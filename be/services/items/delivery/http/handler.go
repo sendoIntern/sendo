@@ -232,7 +232,7 @@ func UpdateItemByIdHandler(c *gin.Context) {
 func ConfirmImportExcel(c *gin.Context) {
 
 	var req struct {
-		Items []entity.Item `json:"items"`
+		ItemsStr []request.ItemUploadRequest `json:"items"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.APIResponse{
@@ -245,7 +245,23 @@ func ConfirmImportExcel(c *gin.Context) {
 
 	// publish item to rabbitmq
 	var errs []entity.ImportError
-	for i, item := range req.Items {
+	for i, itemStr := range req.ItemsStr {
+
+		quantity, _ := strconv.ParseInt(itemStr.Quantity, 10, 64)
+		price, _ := strconv.ParseFloat(itemStr.Price, 64)
+		view, _ := strconv.ParseInt(itemStr.View, 10, 64)
+		recommend, _ := strconv.ParseInt(itemStr.Recommend, 10, 64)
+
+		item := entity.Item{
+			Name:        itemStr.Name,
+			Description: itemStr.Description,
+			Picture:     itemStr.Picture,
+			Quantity:    quantity,
+			Price:       price,
+			View:        view,
+			Recommend:   recommend,
+		}
+
 		if err := rabbitmq.Publish(item); err != nil {
 			errs = append(errs, entity.ImportError{
 				Description: fmt.Sprintf("PUBLISH ERROR AT ITEM(%d)_%s: %s", i, item.Name, err.Error()),

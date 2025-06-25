@@ -21,3 +21,13 @@ type ItemUpdatingRequest struct {
 	PictureHeader *multipart.FileHeader `form:"picture"`
 	PictureFile   *multipart.File
 }
+
+type ItemUploadRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Quantity    string `json:"quantity"`
+	Price       string `json:"price"`
+	Picture     string `json:"picture"`
+	View        string `json:"view"`
+	Recommend   string `json:"recommend"`
+}
