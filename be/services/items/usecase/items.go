@@ -94,10 +94,11 @@ func GetAllItems(
 	search string,
 	minPrice float64,
 	maxPrice float64,
-	originalTotal int64) ([]entity.Item, error) {
+	originalTotal int64,
+	status string) ([]entity.Item, error) {
 
 	p.Offset = (p.Page - 1) * p.Limit
-	items, err := repository.FetchItems(p, search, minPrice, maxPrice, originalTotal)
+	items, err := repository.FetchItems(p, search, minPrice, maxPrice, originalTotal, status)
 	if err != nil {
 		return items, err
 	}

@@ -80,10 +80,14 @@ func FetchItems(
 	search string,
 	minPrice float64,
 	maxPrice float64,
-	originalTotal int64) ([]entity.Item, error) {
+	originalTotal int64,
+	status string) ([]entity.Item, error) {
 
 	var items []entity.Item
-	query := database.Model(&entity.Item{}).Where("status = true")
+	query := database.Model(&entity.Item{})
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
 
 	if search != "" {
 		query = query.Where("name ILIKE ? OR description ILIKE ?", "%"+search+"%", "%"+search+"%")
