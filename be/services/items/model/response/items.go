@@ -24,3 +24,14 @@ type ItemUpdatingResponse struct {
 	Picture     string    `json:"picture"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+type ItemUploadResponse struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Quantity    string `json:"quantity"`
+	Price       string `json:"price"`
+	Picture     string `json:"picture"`
+	View        string `json:"view"`
+	Recommend   string `json:"recommend"`
+	ItemErr     string `json:"item_err"`
+}
