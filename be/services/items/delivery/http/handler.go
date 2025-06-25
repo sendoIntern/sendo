@@ -29,14 +29,8 @@ func GetAllItemsHandler(c *gin.Context) {
 	maxPriceStr := c.DefaultQuery("maxPrice", "0")
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "6")
-	// statusStr := c.Query("status")
-// 	var status *bool
-// 	if statusStr != "" {
-//     val, err := strconv.ParseBool(statusStr)
-//     if err == nil {
-//         status = &val
-//     }
-// }
+	statusStr := c.DefaultQuery("status", "")
+
 	minPrice, _ := strconv.ParseFloat(minPriceStr, 64)
 	maxPrice, _ := strconv.ParseFloat(maxPriceStr, 64)
 	page, _ := strconv.Atoi(pageStr)
@@ -48,7 +42,7 @@ func GetAllItemsHandler(c *gin.Context) {
 	}
 
 	// ======= Cache key setup =======
-	baseKey := fmt.Sprintf("items:search=%s:min=%s:max=%s", search, minPriceStr, maxPriceStr)
+	baseKey := fmt.Sprintf("items:search=%s:min=%s:max=%s:status=%s", search, minPriceStr, maxPriceStr, statusStr)
 	cacheKey := fmt.Sprintf("%s:page=%s:limit=%s", baseKey, pageStr, limitStr)
 	totalKey := fmt.Sprintf("%s:originalTotal", baseKey)
 
@@ -68,7 +62,7 @@ func GetAllItemsHandler(c *gin.Context) {
 	}
 
 	// ======= Query database =======
-	items, err := usecase.GetAllItems(&paging, search, minPrice, maxPrice, originalTotal)
+	items, err := usecase.GetAllItems(&paging, search, minPrice, maxPrice, originalTotal, statusStr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.APIResponse{
 			Status:  "Fail",
@@ -277,7 +271,7 @@ func UploadExcelHandler(c *gin.Context) {
 		return
 	}
 	items, parseErrs := usecase.ParseExcel(file)
-
+	fmt.Print(parseErrs)
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
 		Message: "Upload excel file successfully",
