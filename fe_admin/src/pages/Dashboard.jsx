@@ -12,6 +12,7 @@ import {
   Space,
   Alert,
   InputNumber,
+  Checkbox,
 } from "antd";
 import {
   UploadOutlined,
@@ -40,11 +41,16 @@ const Dashboard = () => {
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
 
+  const [fileExcelImport, setFileExcelImport] = useState(null);
+  const [confirmImportModal, setConfirmImportModal] = useState(false);
+
   const [showImportModal, setShowImportModal] = useState(false);
 
   const [alert, setAlert] = useState(null); // { type: "success" | "error", message: string }
 
   const [statusFillter, setStatusFillter] = useState(null);
+
+  const [selectedImportItems, setSelectedImportItems] = useState([]); // lưu item khi được check
 
   // Hàm showAlert tiện lợi, tự ẩn sau duration ms
   const showAlert = (type, messageText, duration = 3000) => {
@@ -195,12 +201,42 @@ const Dashboard = () => {
         withCredentials: true,
       });
       console.log(res.data);
+      setFileExcelImport(res.data.data);
+      setConfirmImportModal(true);
+      setShowImportModal(false);
     } catch (error) {
       console.error("Error importing Excel file:", error);
       showAlert("error", "❌ Lỗi khi import file.");
     } finally {
       fetchProducts();
       setLoading(false);
+    }
+  };
+
+  const handleConfirmFileImport = async () => {
+    setLoading(true);
+    try {
+      const payload = { items: selectedImportItems };
+      console.log(payload);
+      await axiosInstance.post(
+        "/item/import/confirm",
+        { payload },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      setSelectedImportItems([]);
+    } catch (error) {
+      console.error("Error confirming file import:", error);
+      showAlert("error", "❌ Lỗi khi xác nhận file import.");
+    } finally {
+      setLoading(false);
+      setFileExcelImport(null);
+      fetchProducts();
     }
   };
 
@@ -255,6 +291,81 @@ const Dashboard = () => {
       ),
     },
   ];
+
+  const columnsImportFile = [
+    {
+      title: "Name",
+      dataIndex: "name",
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+    },
+    {
+      title: "Quantity",
+      dataIndex: "quantity",
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      render: (value) => `${Number(value).toLocaleString()} $`,
+    },
+    {
+      title: "Picture",
+      dataIndex: "picture",
+      render: (src) => (
+        <img
+          src={src}
+          alt="item"
+          style={{ width: 50, height: 50, objectFit: "cover" }}
+        />
+      ),
+    },
+    {
+      title: "View",
+      dataIndex: "view",
+    },
+    {
+      title: "Recommend",
+      dataIndex: "recommend",
+    },
+    {
+      title: "Item Error",
+      dataIndex: "item_err",
+      render: (text) => (
+        <span style={{ color: text ? "red" : "inherit" }}>{text}</span>
+      ),
+    },
+    {
+      title: "Actions",
+      dataIndex: "check_item",
+      render: (_, record) =>
+        !record.item_err ? (
+          <Checkbox
+            checked={selectedImportItems.some(
+              (item) => item.name === record.name
+            )}
+            onChange={(e) => {
+              const isChecked = e.target.checked;
+              if (isChecked) {
+                const { item_err, ...cleanedRecord } = record;
+                const updated = [...selectedImportItems, cleanedRecord];
+                setSelectedImportItems(updated);
+              } else {
+                const updated = selectedImportItems.filter(
+                  (item) => item.name !== record.name
+                );
+                setSelectedImportItems(updated);
+              }
+            }}
+          />
+        ) : null,
+    },
+  ];
+
+  useEffect(() => {
+    console.log("Selected items updated:", selectedImportItems);
+  }, [selectedImportItems]);
 
   return (
     <>
@@ -508,7 +619,7 @@ const Dashboard = () => {
         </Form>
       </Modal>
 
-      {/* Import Modal */}
+      {/* UploadFile Modal */}
       <Modal
         open={showImportModal}
         title="Import Products from Excel"
@@ -530,6 +641,25 @@ const Dashboard = () => {
         <Link href="\ItemIport.xlsx" download>
           Tải file mẫu ở đây
         </Link>
+      </Modal>
+
+      {/* Confirm file import Modal */}
+      <Modal
+        open={confirmImportModal}
+        onCancel={() => {
+          setConfirmImportModal(false), setSelectedImportItems([]);
+        }}
+        onOk={handleConfirmFileImport}
+        width="100%"
+      >
+        <Table
+          columns={columnsImportFile}
+          dataSource={fileExcelImport}
+          loading={loading}
+        />
+        <Typography style={{ fontWeight: "bold" }}>
+          Check những item trước khi submit
+        </Typography>
       </Modal>
     </>
   );
