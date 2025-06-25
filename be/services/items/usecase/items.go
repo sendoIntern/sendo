@@ -6,14 +6,13 @@ import (
 	"be/pkg/pagination"
 	"be/services/items/model/entity"
 	"be/services/items/model/request"
+	"be/services/items/model/response"
 	"be/services/items/repository"
 	"errors"
-	"fmt"
 	"log"
 	"math"
 	"mime/multipart"
 	"strconv"
-	"time"
 
 	"github.com/xuri/excelize/v2"
 
@@ -121,36 +120,26 @@ func GetItemById(itemId string) (*entity.Item, error) {
 	return &item, nil
 }
 
-func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []entity.ImportError) {
-	var items []entity.Item
-	var errs []entity.ImportError
+func ParseExcel(file *multipart.FileHeader) ([]response.ItemUploadResponse, error) {
+	var items []response.ItemUploadResponse
 
 	f, err := file.Open()
 	if err != nil {
 		log.Printf("Cannot open file: %v\n", err)
-		errs = append(errs, entity.ImportError{
-			Description: "CANNOT OPEN EXCEL FILE",
-		})
-		return items, errs
+		return items, errors.New("CANNOT OPEN FILE")
 	}
 	defer f.Close()
 
 	excelFile, err := excelize.OpenReader(f)
 	if err != nil {
 		log.Printf("Invalid excel file: %v\n", err)
-		errs = append(errs, entity.ImportError{
-			Description: "INVALID EXCEL FILE",
-		})
-		return items, errs
+		return items, errors.New("INVALID EXCEL FILE")
 	}
 
 	rows, err := excelFile.GetRows("Sheet1")
 	if err != nil {
 		log.Printf("Cannot read sheet: %v\n", err)
-		errs = append(errs, entity.ImportError{
-			Description: "CANNOT READ SHEET",
-		})
-		return items, errs
+		return items, errors.New("CANNOT READ SHEET")
 	}
 
 	for i, row := range rows {
@@ -158,72 +147,51 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []entity.ImportError
 			continue // skip header
 		}
 
+		var item response.ItemUploadResponse
+		item.ItemErr = ""
 		// Kiểm tra số lượng cột
 		if len(row) < 6 {
-			log.Printf("Row %d: Invalid number of columns, expected at least 6, got %d", i, len(row))
-			errs = append(errs, entity.ImportError{
-				Description: fmt.Sprintf("ROW %d: Invalid number of columns, expected at least 6", i),
-			})
-			continue
+			item.ItemErr += "Invalid number of columns, expected at least 6___"
 		}
 		// validate fields
-		name := row[0]
-		if repository.IsExistItemByName(name) {
-			errs = append(errs, entity.ImportError{
-				Description: fmt.Sprintf("ROW %d: Duplicate name with an existed item", i),
-			})
-			continue
+		item.Name = row[0]
+		if repository.IsExistItemByName(item.Name) {
+			item.ItemErr += "Duplicate name with an existed item___"
 		}
-		price, err := strconv.ParseFloat(row[3], 64)
+
+		item.Price = row[3]
+		price, err := strconv.ParseFloat(item.Price, 64)
 		if err != nil || price < 0 {
-			errs = append(errs, entity.ImportError{
-				Description: fmt.Sprintf("ROW %d: Invalid value at price column, expected positive float number", i),
-			})
-			continue
+			item.ItemErr += "Invalid value at price column, expected positive float number___"
 		}
-		quantity, err := strconv.ParseInt(row[2], 10, 64)
+
+		item.Quantity = row[2]
+		quantity, err := strconv.ParseInt(item.Quantity, 10, 64)
 		if err != nil || quantity < 0 {
-			errs = append(errs, entity.ImportError{
-				Description: fmt.Sprintf("ROW %d: Invalid value at quantity column, expected positive integer number", i),
-			})
-			continue
+			item.ItemErr += "Invalid value at quantity column, expected positive integer number___"
 		}
-		view, err := strconv.ParseInt(row[5], 10, 64)
+
+		item.View = row[5]
+		view, err := strconv.ParseInt(item.View, 10, 64)
 		if err != nil || view < 0 {
-			errs = append(errs, entity.ImportError{
-				Description: fmt.Sprintf("ROW %d: Invalid value at view column, expected positive integer number", i),
-			})
-			continue
+			item.ItemErr += "Invalid value at view column, expected positive integer number___"
 		}
 
 		// Mặc định recommend = 0 nếu không có cột 7
-		recommend := int64(0)
+		item.Recommend = "0"
 		if len(row) > 6 {
-			recommend, err = strconv.ParseInt(row[6], 10, 64)
+			item.Recommend = row[6]
+			recommend, err := strconv.ParseInt(item.Recommend, 10, 64)
 			if err != nil || recommend < 0 {
-				errs = append(errs, entity.ImportError{
-					Description: fmt.Sprintf("ROW %d: Invalid value at recommend column, expected positive integer number", i),
-				})
-				continue
+				item.ItemErr += "Invalid value at recommend column, expected positive integer number___"
 			}
 		}
-
-		item := entity.Item{
-			Name:        row[0],
-			Description: row[1],
-			Quantity:    quantity,
-			Price:       price,
-			Picture:     row[4],
-			View:        view,
-			Recommend:   recommend,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-		}
-
+		item.Description = row[1]
+		item.Picture = row[4]
 		items = append(items, item)
 	}
 
-	return items, errs
+	return items, nil
 }
 
 func GetErrorItems() ([]entity.ImportError, error) {
