@@ -195,18 +195,6 @@ const Dashboard = () => {
         withCredentials: true,
       });
       console.log(res.data);
-      const isErr = await axiosInstance.get("/item/getErrorItems", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        withCredentials: true,
-      });
-
-      if (isErr.data.length === 0) {
-        showAlert("success", "📥 Import Excel thành công!");
-      } else {
-        showAlert("error", "❌ Import thất bại, có dữ liệu lỗi.");
-      }
     } catch (error) {
       console.error("Error importing Excel file:", error);
       showAlert("error", "❌ Lỗi khi import file.");
@@ -216,7 +204,7 @@ const Dashboard = () => {
     }
   };
 
-  const columns = [
+  const columnsDefault = [
     {
       title: "Image",
       dataIndex: "picture",
@@ -322,7 +310,7 @@ const Dashboard = () => {
         </Space>
 
         <Table
-          columns={columns}
+          columns={columnsDefault}
           dataSource={data}
           loading={loading}
           rowKey="id"

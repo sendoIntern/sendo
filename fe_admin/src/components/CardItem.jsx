@@ -47,13 +47,9 @@ function CardItem() {
           status: true,
         },
       });
-      console.log("before:", res.data.data);
-      const filterItems = await res.data.data.filter(
-        (item) => item.is_active === true
-      );
-      console.log("filterItems:", filterItems);
-      setData(filterItems);
-      setTotalPages(res.data.totalPages);
+      console.log(res.data);
+      setData(res.data.data);
+      setTotalPages(res.data.pagination.total_pages);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
