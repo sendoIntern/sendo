@@ -271,11 +271,18 @@ func UploadExcelHandler(c *gin.Context) {
 		return
 	}
 	items, err := usecase.ParseExcel(file)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.APIResponse{
+			Status:  "Fail",
+			Message: "Parse excel file error",
+			Error:   err.Error(),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
 		Message: "Upload excel file successfully",
 		Data:    items,
-		Error:   err.Error(),
 	})
 }
 
