@@ -35,6 +35,11 @@ func CreateItem(req request.ItemCreationRequest) (entity.Item, error) {
 		Picture:     imageURL,
 	}
 
+	fieldErr := ValidateItem(item)
+	if fieldErr != nil {
+		return entity.Item{}, fieldErr
+	}
+
 	if err := repository.CreateItem(item); err != nil {
 		return entity.Item{}, err
 	}
@@ -214,4 +219,15 @@ func GetItemDesc() ([]entity.Item, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+func ValidateItem(item entity.Item) error {
+	if repository.IsExistItemByName(item.Name) {
+		return errors.New("THIS ITEM NAME IS EXISTED")
+	}
+	if item.Quantity < 0 || item.Price < 0 {
+		return errors.New("QUANTITY AND PRICE CANNOT NEGATIVE")
+	}
+
+	return nil
 }
