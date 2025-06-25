@@ -29,7 +29,14 @@ func GetAllItemsHandler(c *gin.Context) {
 	maxPriceStr := c.DefaultQuery("maxPrice", "0")
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "6")
-
+	// statusStr := c.Query("status")
+// 	var status *bool
+// 	if statusStr != "" {
+//     val, err := strconv.ParseBool(statusStr)
+//     if err == nil {
+//         status = &val
+//     }
+// }
 	minPrice, _ := strconv.ParseFloat(minPriceStr, 64)
 	maxPrice, _ := strconv.ParseFloat(maxPriceStr, 64)
 	page, _ := strconv.Atoi(pageStr)

@@ -38,7 +38,7 @@ func SignAccessToken(user entity.User) (string, error) {
 		"email":   user.Email,
 		"name":    user.Name,
 		"role":    user.Role,
-		"exp":     time.Now().Add(time.Hour).Unix(),
+		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET_ACCESSTOKEN")))
 	if err != nil {

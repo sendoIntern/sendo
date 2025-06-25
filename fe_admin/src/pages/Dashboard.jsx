@@ -44,6 +44,8 @@ const Dashboard = () => {
 
   const [alert, setAlert] = useState(null); // { type: "success" | "error", message: string }
 
+  const [statusFillter, setStatusFillter] = useState(null);
+
   // Hàm showAlert tiện lợi, tự ẩn sau duration ms
   const showAlert = (type, messageText, duration = 3000) => {
     setAlert({ type, message: messageText });
@@ -69,18 +71,18 @@ const Dashboard = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const params = {
-        page: currentPage,
-        limit,
-        search: searchTerm || undefined,
-        minPrice: minPrice || undefined,
-        maxPrice: maxPrice || undefined,
-      };
       const res = await axiosInstance.get("/item/getAllItems", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        params,
+        params: {
+          page: currentPage,
+          limit,
+          search: searchTerm || undefined,
+          minPrice: minPrice || undefined,
+          maxPrice: maxPrice || undefined,
+          status: statusFillter,
+        },
         withCredentials: true,
       });
       if (res.data) {
@@ -186,13 +188,13 @@ const Dashboard = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      await axiosInstance.post("/item/import", formData, {
+      const res = await axiosInstance.post("/item/import", formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         withCredentials: true,
       });
-      console.log("import ok");
+      console.log(res.data);
       const isErr = await axiosInstance.get("/item/getErrorItems", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -257,7 +259,6 @@ const Dashboard = () => {
           value: false,
         },
       ],
-      onFilter: (value, record) => record.is_active === value,
       render: (_, record) => (
         <Button onClick={() => handleChangeStatus(record)}>
           {record.is_active ? "Active" : "Inactive"}
@@ -326,8 +327,10 @@ const Dashboard = () => {
           rowKey="id"
           pagination={false}
           onChange={(pagination, filters) => {
-            // xử lý filter nếu cần theo dõi trạng thái
-            console.log("Filters: ", filters);
+            const activeStatus = filters?.is_active?.[0]; // true / false
+            setStatusFillter(activeStatus);
+            console.log("after set", activeStatus);
+            fetchProducts(); // 👈 Gọi lại API
           }}
         />
 

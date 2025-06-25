@@ -44,10 +44,16 @@ function CardItem() {
           search: searchTerm || undefined,
           minPrice: minPrice !== null ? minPrice : undefined,
           maxPrice: maxPrice !== null ? maxPrice : undefined,
+          status: true,
         },
       });
-      setData(res.data.data || []);
-      setTotalPages(res.data.pagination?.total_pages || 1);
+      console.log("before:", res.data.data);
+      const filterItems = await res.data.data.filter(
+        (item) => item.is_active === true
+      );
+      console.log("filterItems:", filterItems);
+      setData(filterItems);
+      setTotalPages(res.data.totalPages);
     } catch (error) {
       console.error("Error fetching products:", error);
     }

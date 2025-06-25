@@ -80,10 +80,17 @@ func FetchItems(
 	search string,
 	minPrice float64,
 	maxPrice float64,
-	originalTotal int64) ([]entity.Item, error) {
+	originalTotal int64,
+) ([]entity.Item, error) {
 
 	var items []entity.Item
-	query := database.Model(&entity.Item{}).Where("status = true")
+	query := database.Model(&entity.Item{})
+
+	// if status == "" {
+	// 	query = query.Where("status = ?", status)
+	// } else {
+	// 	query = query.Where("status = true")
+	// }
 
 	if search != "" {
 		query = query.Where("name ILIKE ? OR description ILIKE ?", "%"+search+"%", "%"+search+"%")
@@ -96,6 +103,7 @@ func FetchItems(
 	if maxPrice > 0 {
 		query = query.Where("price <= ?", maxPrice)
 	}
+
 
 	// Đếm tổng số dòng
 	if err := query.Count(&p.Total).Error; err != nil {
