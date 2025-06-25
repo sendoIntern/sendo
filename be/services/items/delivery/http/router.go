@@ -18,7 +18,6 @@ func ItemRoutes(r *gin.Engine) {
 		itemGroup.PATCH("/changeStatus/:id", middleware.ValidateAccessToken(), middleware.ItemIDMiddleware(), ChangeStatusItemHandler)
 		itemGroup.POST("/import", middleware.ValidateAccessToken(), middleware.RequireExcelFileMiddleware(), UploadExcelHandler)
 		itemGroup.POST("/import/confirm", middleware.ValidateAccessToken(), ConfirmImportExcel)
-		itemGroup.GET("/getErrorItems", middleware.ValidateAccessToken(), GetImportErrorsHandler)
 
 		itemGroup.GET("/getItemDesc", middleware.ValidateAccessToken(), GetItemDescHandler) // lấy 3 item có view cao nhất
 

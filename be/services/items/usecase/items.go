@@ -8,6 +8,7 @@ import (
 	"be/services/items/model/request"
 	"be/services/items/repository"
 	"errors"
+	"fmt"
 	"log"
 	"math"
 	"mime/multipart"
@@ -120,14 +121,16 @@ func GetItemById(itemId string) (*entity.Item, error) {
 	return &item, nil
 }
 
-func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
+func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []entity.ImportError) {
 	var items []entity.Item
-	var errs []error
+	var errs []entity.ImportError
 
 	f, err := file.Open()
 	if err != nil {
 		log.Printf("Cannot open file: %v\n", err)
-		errs = append(errs, errors.New("Cannot open file excel: "+err.Error()))
+		errs = append(errs, entity.ImportError{
+			Description: "CANNOT OPEN EXCEL FILE",
+		})
 		return items, errs
 	}
 	defer f.Close()
@@ -135,14 +138,18 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
 	excelFile, err := excelize.OpenReader(f)
 	if err != nil {
 		log.Printf("Invalid excel file: %v\n", err)
-		errs = append(errs, errors.New("Invalid file type: "+err.Error()))
+		errs = append(errs, entity.ImportError{
+			Description: "INVALID EXCEL FILE",
+		})
 		return items, errs
 	}
 
 	rows, err := excelFile.GetRows("Sheet1")
 	if err != nil {
 		log.Printf("Cannot read sheet: %v\n", err)
-		errs = append(errs, errors.New("Cannot read sheet: "+err.Error()))
+		errs = append(errs, entity.ImportError{
+			Description: "CANNOT READ SHEET",
+		})
 		return items, errs
 	}
 
@@ -154,28 +161,38 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
 		// Kiểm tra số lượng cột
 		if len(row) < 6 {
 			log.Printf("Row %d: Invalid number of columns, expected at least 6, got %d", i, len(row))
-			errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid number of columns, expected at least 6"))
+			errs = append(errs, entity.ImportError{
+				Description: fmt.Sprintf("ROW %d: Invalid number of columns, expected at least 6", i),
+			})
 			continue
 		}
 		// validate fields
 		name := row[0]
 		if repository.IsExistItemByName(name) {
-			errs = append(errs, errors.New("ROW "+string(rune(i))+": Duplicate name with an existed item"))
+			errs = append(errs, entity.ImportError{
+				Description: fmt.Sprintf("ROW %d: Duplicate name with an existed item", i),
+			})
 			continue
 		}
 		price, err := strconv.ParseFloat(row[3], 64)
 		if err != nil || price < 0 {
-			errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid value at price column, expected positive float number"))
+			errs = append(errs, entity.ImportError{
+				Description: fmt.Sprintf("ROW %d: Invalid value at price column, expected positive float number", i),
+			})
 			continue
 		}
 		quantity, err := strconv.ParseInt(row[2], 10, 64)
 		if err != nil || quantity < 0 {
-			errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid value at quantity column, expected positive integer number"))
+			errs = append(errs, entity.ImportError{
+				Description: fmt.Sprintf("ROW %d: Invalid value at quantity column, expected positive integer number", i),
+			})
 			continue
 		}
 		view, err := strconv.ParseInt(row[5], 10, 64)
 		if err != nil || view < 0 {
-			errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid value at view column, expected positive integer number"))
+			errs = append(errs, entity.ImportError{
+				Description: fmt.Sprintf("ROW %d: Invalid value at view column, expected positive integer number", i),
+			})
 			continue
 		}
 
@@ -184,7 +201,9 @@ func ParseExcel(file *multipart.FileHeader) ([]entity.Item, []error) {
 		if len(row) > 6 {
 			recommend, err = strconv.ParseInt(row[6], 10, 64)
 			if err != nil || recommend < 0 {
-				errs = append(errs, errors.New("ROW "+string(rune(i))+": Invalid value at recommend column, expected positive integer number"))
+				errs = append(errs, entity.ImportError{
+					Description: fmt.Sprintf("ROW %d: Invalid value at recommend column, expected positive integer number", i),
+				})
 				continue
 			}
 		}

@@ -17,8 +17,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"errors"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -246,10 +244,12 @@ func ConfirmImportExcel(c *gin.Context) {
 	}
 
 	// publish item to rabbitmq
-	var errs []error
+	var errs []entity.ImportError
 	for i, item := range req.Items {
 		if err := rabbitmq.Publish(item); err != nil {
-			errs = append(errs, errors.New("Publish item error:"+string(rune(i))+"__"+err.Error()))
+			errs = append(errs, entity.ImportError{
+				Description: fmt.Sprintf("PUBLISH ERROR AT ITEM(%d)_%s: %s", i, item.Name, err.Error()),
+			})
 		}
 	}
 
@@ -271,7 +271,6 @@ func UploadExcelHandler(c *gin.Context) {
 		return
 	}
 	items, parseErrs := usecase.ParseExcel(file)
-	fmt.Print(parseErrs)
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
 		Message: "Upload excel file successfully",
@@ -279,23 +278,6 @@ func UploadExcelHandler(c *gin.Context) {
 			"items":  items,
 			"errors": parseErrs,
 		},
-	})
-}
-
-func GetImportErrorsHandler(c *gin.Context) {
-	importErrs, err := usecase.GetErrorItems()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.APIResponse{
-			Status:  "Fail",
-			Message: "Cannot get error items",
-			Error:   err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, response.APIResponse{
-		Status:  "Success",
-		Message: "Import errors retrieved successfully",
-		Data:    importErrs,
 	})
 }
 

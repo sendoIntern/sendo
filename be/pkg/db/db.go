@@ -38,7 +38,6 @@ func GetDB() *gorm.DB {
 		err = db.AutoMigrate(
 			&entity.User{},
 			&itemsEntity.Item{},
-			&itemsEntity.ImportError{},
 		)
 		if err != nil {
 			log.Fatal("Failed to migrate database:", err)
