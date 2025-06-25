@@ -271,7 +271,6 @@ func UploadExcelHandler(c *gin.Context) {
 		return
 	}
 	items, parseErrs := usecase.ParseExcel(file)
-	fmt.Print(parseErrs)
 	c.JSON(http.StatusOK, response.APIResponse{
 		Status:  "Success",
 		Message: "Upload excel file successfully",
@@ -279,23 +278,6 @@ func UploadExcelHandler(c *gin.Context) {
 			"items":  items,
 			"errors": parseErrs,
 		},
-	})
-}
-
-func GetImportErrorsHandler(c *gin.Context) {
-	importErrs, err := usecase.GetErrorItems()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.APIResponse{
-			Status:  "Fail",
-			Message: "Cannot get error items",
-			Error:   err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, response.APIResponse{
-		Status:  "Success",
-		Message: "Import errors retrieved successfully",
-		Data:    importErrs,
 	})
 }
 
