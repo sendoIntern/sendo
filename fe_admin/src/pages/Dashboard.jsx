@@ -115,7 +115,7 @@ const Dashboard = () => {
         }
       });
 
-      await axiosInstance.post("/item/createNewItem", formData, {
+      const res = await axiosInstance.post("/item/createNewItem", formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
@@ -127,14 +127,15 @@ const Dashboard = () => {
       formCreate.resetFields();
       fetchProducts();
     } catch (error) {
-      console.error("Error creating product:", error);
-      showAlert("error", "Error creating product!");
+      console.error("Error creating product:", error.response?.data.error);
+      showAlert("error", error.response?.data.error);
+      setShowCreateModal(false);
+      formCreate.resetFields();
     } finally {
       setLoading(false);
     }
   };
 
-  const [errorUpdate, setErrorUpdate] = useState(null);
   const handleUpdate = async (values) => {
     setLoading(true);
     try {
@@ -157,18 +158,13 @@ const Dashboard = () => {
         }
       );
       setShowUpdateModal(false);
-      setErrorUpdate(res.data.error);
       console.log(res.data);
       fetchProducts();
-      // if (res.data.error !== null) {
-      //   showAlert("error", res.data.error);
-      //   console.log("Error updating product:", res.data.error);
-      // } else {
-      //   showAlert("success", "Product updated successfully!");
-      // }
+      showAlert("success", "Product updated successfully!");
     } catch (error) {
-      console.error("Error updating product:", error);
-      showAlert("error:", "Không có response từ server.");
+      console.error("Error updating product:", error.response?.data.error);
+      showAlert("error", error.response?.data.error);
+      setShowUpdateModal(false);
     } finally {
       setLoading(false);
     }
