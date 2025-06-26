@@ -157,14 +157,17 @@ const Dashboard = () => {
           withCredentials: true,
         }
       );
-
-      showAlert("success", "Product updated successfully!");
       setShowUpdateModal(false);
       fetchProducts();
       setErrorUpdate(res.data.error);
+      if (res.data.error == null) {
+        showAlert("error", res.data.error);
+      } else {
+        showAlert("success", "Product updated successfully!");
+      }
     } catch (error) {
       console.error("Error updating product:", error);
-      showAlert("error:", errorUpdate);
+      showAlert("error:", "Không có response từ server.");
     } finally {
       setLoading(false);
     }
