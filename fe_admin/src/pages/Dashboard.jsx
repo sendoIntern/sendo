@@ -146,7 +146,6 @@ const Dashboard = () => {
           formData.append(key, value);
         }
       });
-
       const res = await axiosInstance.put(
         `/item/${selectedItem.id}`,
         formData,
@@ -158,13 +157,15 @@ const Dashboard = () => {
         }
       );
       setShowUpdateModal(false);
-      fetchProducts();
       setErrorUpdate(res.data.error);
-      if (res.data.error == null) {
-        showAlert("error", res.data.error);
-      } else {
-        showAlert("success", "Product updated successfully!");
-      }
+      console.log(res.data);
+      fetchProducts();
+      // if (res.data.error !== null) {
+      //   showAlert("error", res.data.error);
+      //   console.log("Error updating product:", res.data.error);
+      // } else {
+      //   showAlert("success", "Product updated successfully!");
+      // }
     } catch (error) {
       console.error("Error updating product:", error);
       showAlert("error:", "Không có response từ server.");
