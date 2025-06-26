@@ -72,7 +72,7 @@ func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error)
 	var item entity.Item
 	item, exist := repository.IsExistItem(uid)
 	if !exist {
-		return entity.Item{}, errors.New("item not found")
+		return entity.Item{}, errors.New("ITEM NOT FOUND")
 	}
 	if req.PictureFile != nil {
 		imgURL, err := cloudinary.UploadToCloudinary(*req.PictureFile, req.PictureHeader)
@@ -86,6 +86,11 @@ func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error)
 	item.Description = req.Description
 	item.Quantity = req.Quantity
 	item.Price = req.Price
+
+	fieldErr := ValidateItem(item)
+	if fieldErr != nil {
+		return entity.Item{}, fieldErr
+	}
 
 	err = repository.UpdateItem(item)
 	if err != nil {
