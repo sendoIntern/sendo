@@ -88,14 +88,15 @@ func UpdateItem(id string, req request.ItemUpdatingRequest) (entity.Item, error)
 			item.Picture = imgURL
 		}
 	}
+	if repository.IsExistItemByName(req.Name) && item.Name != req.Name {
+		return entity.Item{}, errors.New("THIS NAME IS EXISTED")
+	}
 	item.Name = req.Name
 	item.Description = req.Description
 	item.Quantity = req.Quantity
 	item.Price = req.Price
-
-	fieldErr := ValidateItem(item)
-	if fieldErr != nil {
-		return entity.Item{}, fieldErr
+	if item.Quantity < 0 || item.Price < 0 {
+		return entity.Item{}, errors.New("QUANTITY AND PRICE CANNOT NEGATIVE")
 	}
 
 	err = repository.UpdateItem(item)

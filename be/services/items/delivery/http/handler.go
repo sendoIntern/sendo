@@ -126,8 +126,8 @@ func CreateItemHandler(c *gin.Context) {
 	} else {
 		req.PictureHeader = fileHeader
 		req.PictureFile = &file
+		defer file.Close()
 	}
-	defer file.Close()
 
 	item, err := usecase.CreateItem(req)
 	if err != nil {
