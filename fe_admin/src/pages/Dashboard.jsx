@@ -53,7 +53,7 @@ const Dashboard = () => {
   const [selectedImportItems, setSelectedImportItems] = useState([]); // lưu item khi được check
 
   // Hàm showAlert tiện lợi, tự ẩn sau duration ms
-  const showAlert = (type, messageText, duration = 3000) => {
+  const showAlert = (type, messageText, duration = 5000) => {
     setAlert({ type, message: messageText });
     setTimeout(() => setAlert(null), duration);
   };
@@ -134,6 +134,7 @@ const Dashboard = () => {
     }
   };
 
+  const [errorUpdate, setErrorUpdate] = useState(null);
   const handleUpdate = async (values) => {
     setLoading(true);
     try {
@@ -146,19 +147,24 @@ const Dashboard = () => {
         }
       });
 
-      await axiosInstance.put(`/item/${selectedItem.id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        withCredentials: true,
-      });
+      const res = await axiosInstance.put(
+        `/item/${selectedItem.id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          withCredentials: true,
+        }
+      );
 
       showAlert("success", "Product updated successfully!");
       setShowUpdateModal(false);
       fetchProducts();
+      setErrorUpdate(res.data.error);
     } catch (error) {
       console.error("Error updating product:", error);
-      showAlert("error", "Error updating product!");
+      showAlert("error:", errorUpdate);
     } finally {
       setLoading(false);
     }
