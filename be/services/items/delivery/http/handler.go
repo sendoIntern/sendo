@@ -131,7 +131,7 @@ func CreateItemHandler(c *gin.Context) {
 
 	item, err := usecase.CreateItem(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.APIResponse{
+		c.JSON(http.StatusBadRequest, response.APIResponse{
 			Status:  "Fail",
 			Message: "Item Creation Error",
 			Error:   err.Error(),
@@ -200,7 +200,7 @@ func UpdateItemByIdHandler(c *gin.Context) {
 	var item entity.Item
 	item, err = usecase.UpdateItem(id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.APIResponse{
+		c.JSON(http.StatusBadRequest, response.APIResponse{
 			Status:  "Fail",
 			Message: "Item Update Error",
 			Error:   err.Error(),
