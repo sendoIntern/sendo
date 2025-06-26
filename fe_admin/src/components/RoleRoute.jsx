@@ -5,12 +5,13 @@ import { auth } from "../lib/auth";
 
 const RoleRoute = ({ allowRoles }) => {
   const role = auth.getRole();
-  console.log(role);
 
-  if (!allowRoles.includes(role)) {
-    return <Navigate to="/" replace />;
+  // Nếu chưa có role (chưa đăng nhập), hoặc không thuộc nhóm được phép
+  if (!role || !allowRoles.includes(role)) {
+    return <Navigate to="/login" replace />;
   }
-  return <Outlet />; // Cho phép truy cập vào các <Route> con
+
+  return <Outlet />;
 };
 
 export default RoleRoute;

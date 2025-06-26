@@ -511,7 +511,11 @@ const Dashboard = () => {
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item name="description" label="Description">
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ required: true, message: "Vui lòng nhập giá" }]}
+          >
             <Input.TextArea />
           </Form.Item>
           <Form.Item
@@ -600,7 +604,11 @@ const Dashboard = () => {
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item name="description" label="Description">
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
+          >
             <Input.TextArea />
           </Form.Item>
           <Form.Item
