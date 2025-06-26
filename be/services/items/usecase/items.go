@@ -32,7 +32,7 @@ func CreateItem(req request.ItemCreationRequest) (entity.Item, error) {
 	var imageURL string
 	var err error
 	if req.PictureHeader == nil || req.PictureFile == nil {
-		imageURL = "/be/pkg/no-image-default.png"
+		imageURL = "https://res.cloudinary.com/dngsic1a0/image/upload/v1750912253/no-image-dafault.png.png"
 	} else {
 		imageURL, err = cloudinary.UploadToCloudinary(*req.PictureFile, req.PictureHeader)
 		if err != nil {
