@@ -9,6 +9,7 @@ import {
   Pagination,
   Modal,
   Typography,
+  Tooltip,
 } from "antd";
 import { axiosInstance } from "../lib/axios";
 import { inputValidate } from "../lib/inputValidate";
@@ -188,19 +189,26 @@ function CardItem() {
                   <Card.Meta
                     title={item.name}
                     description={
-                      <Paragraph
-                        ellipsis={{ rows: 3 }}
-                        onClick={() => showModal(item)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        {item.description}
-                      </Paragraph>
+                      <Tooltip title={item.description}>
+                        <Paragraph
+                          ellipsis={{ rows: 1 }}
+                          onClick={() => showModal(item)}
+                          style={{ cursor: "pointer" }}
+                          // dài quá thì ...
+                        >
+                          {item.description}
+                        </Paragraph>
+                      </Tooltip>
                     }
                   />
-                  <Title level={5} style={{ marginTop: 12 }}>
+                  <Title
+                    level={5}
+                    style={{ marginTop: 12 }}
+                    onClick={() => showModal(item)}
+                  >
                     Price: {inputValidate.formatNumberWithCommas(item.price)}$
                   </Title>
-                  <Button type="link" block>
+                  <Button type="primary" block>
                     Buy
                   </Button>
                 </Card>
