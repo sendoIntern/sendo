@@ -129,7 +129,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error creating product:", error.response?.data.error);
       showAlert("error", error.response?.data.error);
-      setShowCreateModal(false);
       formCreate.resetFields();
     } finally {
       setLoading(false);
@@ -164,7 +163,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error updating product:", error.response?.data.error);
       showAlert("error", error.response?.data.error);
-      setShowUpdateModal(false);
     } finally {
       setLoading(false);
     }
@@ -380,9 +378,16 @@ const Dashboard = () => {
           type={alert.type}
           message={alert.message}
           showIcon
-          closable
-          onClose={() => setAlert(null)}
-          style={{ marginBottom: 16 }}
+          style={{
+            position: "fixed",
+            top: 20,
+            right: 20, // nằm góc phải
+            zIndex: 2000,
+            width: 400, // to ra
+            fontSize: 16, // tăng cỡ chữ
+            padding: "16px 24px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          }}
         />
       )}
 
