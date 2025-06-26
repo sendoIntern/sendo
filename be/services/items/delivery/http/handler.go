@@ -112,25 +112,22 @@ func GetItemByIdHandler(c *gin.Context) {
 }
 
 func CreateItemHandler(c *gin.Context) {
-	file, fileHeader, err := c.Request.FormFile("picture")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, response.APIResponse{
-			Status:  "Fail",
-			Message: "Image is required",
-			Error:   err.Error(),
-		})
-		return
-	}
-	defer file.Close()
-
-	// Nhận các field khác từ form-data
+	// Nhận các field từ form-data
 	var req request.ItemCreationRequest
 	req.Name = c.PostForm("name")
 	req.Description = c.PostForm("description")
 	req.Quantity, _ = strconv.ParseInt(c.PostForm("quantity"), 10, 64)
 	req.Price, _ = strconv.ParseFloat(c.PostForm("price"), 64)
-	req.PictureHeader = fileHeader
-	req.PictureFile = &file
+
+	file, fileHeader, err := c.Request.FormFile("picture")
+	if err != nil {
+		req.PictureHeader = nil
+		req.PictureFile = nil
+	} else {
+		req.PictureHeader = fileHeader
+		req.PictureFile = &file
+	}
+	defer file.Close()
 
 	item, err := usecase.CreateItem(req)
 	if err != nil {
