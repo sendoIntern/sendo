@@ -115,7 +115,7 @@ const Dashboard = () => {
         }
       });
 
-      const res = await axiosInstance.post("/item/createNewItem", formData, {
+      await axiosInstance.post("/item/createNewItem", formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
@@ -129,7 +129,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error creating product:", error.response?.data.error);
       showAlert("error", error.response?.data.error);
-      formCreate.resetFields();
+      formCreate.setFieldsValue({ name: "" });
     } finally {
       setLoading(false);
     }
@@ -157,7 +157,6 @@ const Dashboard = () => {
         }
       );
       setShowUpdateModal(false);
-      console.log(res.data);
       fetchProducts();
       showAlert("success", "Product updated successfully!");
     } catch (error) {
